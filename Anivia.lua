@@ -1,34 +1,27 @@
-local version = "1.2"
-local autoupdateenabled = true
-local UPDATE_SCRIPT_NAME = "Anivia"
+local version = "1.1"
+local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
-local UPDATE_PATH = "/gmzopper/BoL/Anivia.lua?rand="..math.random(1000)
-local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
+local UPDATE_PATH = "/gmzopper/BoL/blob/master/Anivia.lua".."?rand="..math.random(1,10000)
+local UPDATE_FILE_PATH = LIB_PATH.."Anivia.lua"
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 
-local ServerData
-if autoupdateenabled then
-	GetAsyncWebResult(UPDATE_HOST, UPDATE_PATH, function(d) ServerData = d end)
-	function update()
-		if ServerData ~= nil then
-			local ServerVersion
-			local send, tmp, sstart = nil, string.find(ServerData, "local version = \"")
-			if sstart then
-				send, tmp = string.find(ServerData, "\"", sstart+1)
+function _AutoupdaterMsg(msg) print("<font color=\"#6699ff\"><b>Anivia:</b></font> <font color=\"#FFFFFF\">"..msg..".</font>") end
+if AUTOUPDATE then
+	local ServerData = GetWebResult(UPDATE_HOST, "/gmzopper/BoL/blob/master/version/Anivia.version")
+	if ServerData then
+		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
+		if ServerVersion then
+			if tonumber(version) < ServerVersion then
+				_AutoupdaterMsg("New version available"..ServerVersion)
+				_AutoupdaterMsg("Updating, please don't press F9")
+				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () _AutoupdaterMsg("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
+			else
+				_AutoupdaterMsg("You have got the latest version ("..ServerVersion..")")
 			end
-			if send then
-				ServerVersion = string.sub(ServerData, sstart+1, send-1)
-			end
-
-			if ServerVersion ~= nil and tonumber(ServerVersion) ~= nil and tonumber(ServerVersion) > tonumber(version) then
-				DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () print("<font color=\"#FF0000\"><b>"..UPDATE_SCRIPT_NAME..":</b> successfully updated. ("..version.." => "..ServerVersion.."). Press F9 Twice to Re-load.</font>") end)     
-			elseif ServerVersion then
-				print("<font color=\"#FF0000\"><b>"..UPDATE_SCRIPT_NAME..":</b> You have got the latest version: <u><b>"..ServerVersion.."</b></u></font>")
-			end		
-			ServerData = nil
 		end
+	else
+		_AutoupdaterMsg("Error downloading version info")
 	end
-	AddTickCallback(update)
 end
 
 if myHero.charName ~= "Anivia" then return end   
@@ -102,7 +95,7 @@ function CustomOnDraw()
 			DrawCircle(myHero.x, myHero.y, myHero.z, SkillR.range, RGB(Settings.drawing.rColor[2], Settings.drawing.rColor[3], Settings.drawing.rColor[4]))
 		end
 		if Settings.drawing.myHero then
-			DrawCircle(myHero.x, myHero.y, myHero.z, myHero.range, RGB(Settings.drawing.myColor[2], Settings.drawing.myColor[3], Settings.drawing.myColor[4]))
+			DrawCircle(myHero.x, myHero.y, myHero.z, 600, RGB(Settings.drawing.myColor[2], Settings.drawing.myColor[3], Settings.drawing.myColor[4]))
 		end
 	end
 end
@@ -378,6 +371,10 @@ function KS()
 			local Edmg = getDmg("E", champ, myHero)
 			local Rdmg = getDmg("R", champ, myHero)
 			local Idmg = getDmg("IGNITE", champ, myHero)
+			
+			if TargetHaveBuff("chilled", champ) then
+				Edmg = Edmg * 2
+			end
 			
 			if Settings.KS.ksQ and champ.health < Qdmg * 0.95 and ValidTarget(champ) then
 				CastQ(champ)
