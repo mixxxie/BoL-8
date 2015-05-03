@@ -2,7 +2,7 @@ local version = "1.2"
 local autoupdateenabled = true
 local UPDATE_SCRIPT_NAME = "Anivia"
 local UPDATE_HOST = "raw.github.com"
-local UPDATE_PATH = "/Jarvis101/BoL/master/JAnivia.lua?rand="..math.random(1000)
+local UPDATE_PATH = "/gmzopper/BoL/Anivia.lua?rand="..math.random(1000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 
