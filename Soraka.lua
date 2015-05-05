@@ -1,4 +1,4 @@
-local version = "1.0"
+local version = "1.01"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Soraka.lua".."?rand="..math.random(1,10000)
@@ -132,26 +132,26 @@ function AutoUltimate()
 		if myHero.dead then return end
 		------------------------------
 
-		if spells.r.ready and Menu.ult.UseUlt then
-			if Menu.ult.UltCast == 2 then
-				if (ally.health / ally.maxHealth < Menu.ult.UltManager /100) then
-					if Menu.ult.UltMode == 1 then
+		if spells.r.ready and settings.ult.UseUlt then
+			if settings.ult.UltCast == 2 then
+				if (ally.health / ally.maxHealth < settings.ult.UltManager /100) then
+					if settings.ult.UltMode == 1 then
 						CastSpell(_R)
-					elseif Menu.ult.UltMode == 2 then
+					elseif settings.ult.UltMode == 2 then
 						if GetDistance(ally, myHero) <= 1500 then
 							CastSpell(_R)
 						end
 					end
 				end
-			elseif Menu.ult.UltCast == 1 then
-				if (myHero.health / myHero.maxHealth < Menu.ult.UltManager2 /100) then
+			elseif settings.ult.UltCast == 1 then
+				if (myHero.health / myHero.maxHealth < settings.ult.UltManager2 /100) then
 					CastSpell(_R)
 				end
-			elseif Menu.ult.UltCast == 3 then
-				if (ally.health / ally.maxHealth < Menu.ult.UltManager /100) or (myHero.health / myHero.maxHealth < Menu.ult.UltManager2 /100) then
-					if Menu.ult.UltMode == 1 then
+			elseif settings.ult.UltCast == 3 then
+				if (ally.health / ally.maxHealth < settings.ult.UltManager /100) or (myHero.health / myHero.maxHealth < settings.ult.UltManager2 /100) then
+					if settings.ult.UltMode == 1 then
 						CastSpell(_R)
-					elseif Menu.ult.UltMode == 2 then
+					elseif settings.ult.UltMode == 2 then
 						if GetDistance(ally, myHero) <= 1500 then
 							CastSpell(_R)
 						end
