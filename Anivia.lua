@@ -1,4 +1,4 @@
-local version = "1.11"
+local version = "1.12"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Anivia.lua".."?rand="..math.random(1,10000)
@@ -293,6 +293,8 @@ function DetQ()
 		for i=1, heroManager.iCount, 1 do
 			local champ = heroManager:GetHero(i)
 			if champ.team ~= myHero.team then
+				if champ.dead then return end
+			
 				if GetDistance(champ, Qobject) < 150 then
 					CastSpell(_Q)
 				end
@@ -352,19 +354,6 @@ function CancelR()
 end
 
 function KS()
-	for _, unit in pairs(GetEnemyHeroes()) do
-		local health = unit.health
-		local dmgR = getDmg("R", unit, myHero) + (myHero.ap)
-		local dmgQ = getDmg("Q", unit, myHero) + (myHero.ap)
-		if health < dmgQ * 0.95 and Settings.killsteal.useQ and ValidTarget(unit) and GetDistance(unit) <= SkillQ.range then
-			CastQ(unit)
-		elseif health < dmgR * 0.95 and Settings.killsteal.useR and ValidTarget(unit) and GetDistance(unit) <= SkillR.range then
-			CastR(unit)
-		end
-	 end
-end
-
-function KS()
 	for _, champ in pairs(GetEnemyHeroes()) do
 		if ValidTarget(champ) and GetDistance(champ, myHero) < 1100 then
 			local Qdmg = getDmg("Q", champ, myHero)
@@ -376,11 +365,11 @@ function KS()
 				Edmg = Edmg * 2
 			end
 			
-			if Settings.KS.ksQ and champ.health < Qdmg * 0.95 and ValidTarget(champ) then
+			if Settings.KS.ksQ and champ.health < Qdmg * 0.95 and ValidTarget(champ) and GetDistance(unit) <= SkillQ.range then
 				CastQ(champ)
 			end
 			
-			if Settings.KS.ksE and GetDistance(champ, myHero) < 650 and champ.health < Edmg * 0.95 and ValidTarget(champ) then
+			if Settings.KS.ksE and GetDistance(unit) <= SkillE.range and champ.health < Edmg * 0.95 and ValidTarget(champ) then
 				CastSpell(_E, champ)
 			end
 			
