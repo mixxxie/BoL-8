@@ -1,4 +1,4 @@
-local version = "1.1"
+local version = "1.11"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Anivia.lua".."?rand="..math.random(1,10000)
@@ -82,7 +82,7 @@ end
  
 function CustomOnDraw()
 	if not myHero.dead and not Settings.drawing.mDraw then 
-		if SkillQ.ready then
+		if SkillQ.ready and Settings.drawing.qDraw then
 			DrawCircle(myHero.x, myHero.y, myHero.z, SkillQ.range, RGB(Settings.drawing.qColor[2], Settings.drawing.qColor[3], Settings.drawing.qColor[4]))
 		end
 		if SkillW.ready and Settings.drawing.wDraw then
@@ -209,7 +209,7 @@ function Menu()
 		Settings.KS:addParam("ksR", "KS with R", SCRIPT_PARAM_ONOFF, true)
 		Settings.KS:addParam("ksIgnite", "KS with Ignite", SCRIPT_PARAM_ONOFF, true)
    
-	TargetSelector.name = "Nautilus"
+	TargetSelector.name = "Anivia"
 		Settings:addTS(TargetSelector)
 
 	if SOWp then
@@ -307,7 +307,7 @@ end
 
 function CastQ(unit)
 	if unit ~= nil and GetDistance(unit) <= SkillQ.range and SkillQ.ready and Qobject == nil then                    
-		CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width,Settings.combo.rangeQ, SkillQ.speed, myHero, true)       
+		CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, true)       
 		CastSpell(_Q, CastPosition.x, CastPosition.z)
 	end
 end    
@@ -356,9 +356,9 @@ function KS()
 		local health = unit.health
 		local dmgR = getDmg("R", unit, myHero) + (myHero.ap)
 		local dmgQ = getDmg("Q", unit, myHero) + (myHero.ap)
-		if health < dmgQ * 0.95 and Settings.killsteal.useQ and ValidTarget(unit) then
+		if health < dmgQ * 0.95 and Settings.killsteal.useQ and ValidTarget(unit) and GetDistance(unit) <= SkillQ.range then
 			CastQ(unit)
-		elseif health < dmgR * 0.95 and Settings.killsteal.useR and ValidTarget(unit) then
+		elseif health < dmgR * 0.95 and Settings.killsteal.useR and ValidTarget(unit) and GetDistance(unit) <= SkillR.range then
 			CastR(unit)
 		end
 	 end
