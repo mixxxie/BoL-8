@@ -302,6 +302,8 @@ function DetQ()
 		end
 	else
 		if GetDistance(Target, Qobject) < 150 then
+			if Target.dead then return end
+		
 			CastSpell(_Q)
 		end
 	end
