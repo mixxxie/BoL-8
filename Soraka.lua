@@ -1,4 +1,4 @@
-local version = "1.01"
+local version = "1.02"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Soraka.lua".."?rand="..math.random(1,10000)
@@ -88,7 +88,7 @@ end
 local qpred = CircleSS(math.huge, 970, 150, .25, 1300)
 local wpred = LineSS(math.huge, 925, 210, .25, math.huge)
 
-function CastQ()
+function CastQ(minEnemies)
 	local closestdistance = 975
 	local enemycount = 0
 	local unit = nil
@@ -105,23 +105,25 @@ function CastQ()
 		end
     end
 
-	if settings.pred == 1 and ValidTarget(unit, spells.q.range) then
-    	local castPos, chance, pos = pred:GetCircularCastPosition(unit, .25, 250, 975, 1300, myHero, false)
-    	if  spells.q.ready and chance >= 2 then
-    	    CastSpell(_Q, castPos.x, castPos.z)
-    	end
-    elseif settings.pred == 2 and ValidTarget(unit, spells.q.range) then
-    	local targ = DPTarget(unit)
-    	local state,hitPos,perc = dp:predict(targ, qpred)
-    	if spells.q.ready and state == SkillShot.STATUS.SUCCESS_HIT then
-       		CastSpell(_Q, hitPos.x, hitPos.z)
-      	end
-	elseif settings.pred == 3 and ValidTarget(unit, spells.q.range) then
-		local pos, chance = HPred:GetPredict("Q", unit, myHero) 
-		if spells.q.ready and chance >= 2 then
-			CastSpell(_Q, pos.x, pos.z)
-		end
-	end
+    if ValidTarget(unit, spells.q.range) and enemycount >= minEnemies then
+        if settings.pred == 1 then
+            local castPos, chance, pos = pred:GetCircularCastPosition(unit, .25, 250, 975, 1300, myHero, false)
+            if  spells.q.ready and chance >= 2 then
+                CastSpell(_Q, castPos.x, castPos.z)
+            end
+        elseif settings.pred == 2 then
+            local targ = DPTarget(unit)
+            local state,hitPos,perc = dp:predict(targ, qpred)
+            if spells.q.ready and state == SkillShot.STATUS.SUCCESS_HIT then
+                CastSpell(_Q, hitPos.x, hitPos.z)
+            end
+        elseif settings.pred == 3 then
+            local pos, chance = HPred:GetPredict("Q", unit, myHero) 
+            if spells.q.ready and chance >= 2 then
+                CastSpell(_Q, pos.x, pos.z)
+            end
+        end
+    end
 end
 
 function AutoUltimate()
@@ -272,11 +274,11 @@ function OnTick()
     end
 	
 	if settings.q.autoQ and hp <= settings.q.autoQhp and mana >= settings.q.autoQmana then
-		CastQ()
+		CastQ(settings.q.autoQenemy)
 	end
 	
 	if settings.combo.comboKey then
-		CastQ()
+		CastQ(1)
 	end
 end
 
@@ -303,7 +305,7 @@ function OnProcessSpell(object, spellProc)
 		if Interrupt[object.charName] ~= nil then
 			spell = Interrupt[object.charName].stop[spellProc.name]
 			if spell ~= nil and spell.ult == true then
-				if GetDistance(object) < spells.r.range then
+				if GetDistance(object) < spells.e.range then
 					if settings.interrupt[spellProc.name] then
 						CastSpell(_E, object.x, object.z)	
 					end
@@ -327,6 +329,7 @@ function Menu()
 		settings.q:addParam("autoQ", "Auto Q", SCRIPT_PARAM_ONOFF, true)
 		settings.q:addParam("autoQmana", "My Minimum Mana", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
 		settings.q:addParam("autoQhp", "My Maximum HP", SCRIPT_PARAM_SLICE, 100, 0, 100, 0)	
+        settings.q:addParam("autoQenemy", "Min enemies: ", SCRIPT_PARAM_SLICE, 2, 1, 5, 0)
 	
 	settings:addSubMenu("[" .. myHero.charName.. "] - Auto Heal", "heal")        
         settings.heal:addParam("UseHeal", "Auto Heal Allies", SCRIPT_PARAM_ONOFF, true)
