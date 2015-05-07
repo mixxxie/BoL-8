@@ -1,4 +1,4 @@
-local version = "1.02"
+local version = "1.03"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Soraka.lua".."?rand="..math.random(1,10000)
@@ -89,12 +89,12 @@ local qpred = CircleSS(math.huge, 970, 150, .25, 1300)
 local wpred = LineSS(math.huge, 925, 210, .25, math.huge)
 
 function CastQ(minEnemies)
-	local closestdistance = 975
+	local closestdistance = 975 + 250
 	local enemycount = 0
 	local unit = nil
 
 	for i, enemy in ipairs(GetEnemyHeroes()) do
-        if GetEnemyCountInPos(enemy, 250) > enemycount and GetDistance(enemy) <= spells.q.range then
+        if GetEnemyCountInPos(enemy, 250) > enemycount and GetDistance(enemy) <= spells.q.range + 250 then
 			unit = enemy
 			enemycount = GetEnemyCountInPos(enemy, 250)
 			closestdistance = GetDistance(enemy)
@@ -105,7 +105,7 @@ function CastQ(minEnemies)
 		end
     end
 
-    if ValidTarget(unit, spells.q.range) and enemycount >= minEnemies then
+    if ValidTarget(unit) and enemycount >= minEnemies then
         if settings.pred == 1 then
             local castPos, chance, pos = pred:GetCircularCastPosition(unit, .25, 250, 975, 1300, myHero, false)
             if  spells.q.ready and chance >= 2 then
