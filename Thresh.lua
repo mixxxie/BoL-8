@@ -1,4 +1,4 @@
-local version = "1.07"
+local version = "1.08"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Thresh.lua".."?rand="..math.random(1,10000)
@@ -84,7 +84,7 @@ isAGapcloserUnit = {
 	['Jayce']       = {true, spell = 'JayceToTheSkies',   range = 600,   projSpeed = 2000, },
 	['Khazix']      = {true, spell = _E,                  range = 900,   projSpeed = 2000, },
 	['Leblanc']     = {true, spell = _W,                  range = 600,   projSpeed = 2000, },
-	['LeeSin']      = {true, spell = 'blindmonkqtwo',     range = 1300,  projSpeed = 1800, },
+	--['LeeSin']      = {true, spell = 'blindmonkqtwo',     range = 1300,  projSpeed = 1800, },
 	['Leona']       = {true, spell = _E,                  range = 900,   projSpeed = 2000, },
 	['Lucian']      = {true, spell = _E,                  range = 425,   projSpeed = 2000, },
 	['Malphite']    = {true, spell = _R,                  range = 1000,  projSpeed = 1500, },
