@@ -1,4 +1,4 @@
-local version = "1.01"
+local version = "1.02"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Thresh.lua".."?rand="..math.random(1,10000)
