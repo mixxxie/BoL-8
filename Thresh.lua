@@ -1,4 +1,4 @@
-local version = "1.09"
+local version = "1.10"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Thresh.lua".."?rand="..math.random(1,10000)
@@ -446,9 +446,9 @@ function OnProcessSpell(object, spellProc)
 		spell = Interrupt[object.charName].stop[spellProc.name]
 		if spell ~= nil then
 			if settings.interrupt[spellProc.name] then
-				if GetDistance(object) < spells.e.range and spell.e.ready then
+				if GetDistance(object) < spells.e.range and spells.e.ready then
 					CastSpell(_E, object.x, object.z)
-				elseif GetDistance(object) < settings.combo.qRange and spell.q.ready then
+				elseif GetDistance(object) < spells.q.range and spells.q.ready then
 					CastQ(object)
 				end
 			end
