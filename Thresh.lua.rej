@@ -1,0 +1,9 @@
+diff a/Thresh.lua b/Thresh.lua	(rejected hunks)
+@@ -99,6 +99,7 @@
+ 	['XinZhao']     = {true, spell = _E,                  range = 650,   projSpeed = 2000, },
+ 	['Yasuo']       = {true, spell = _E,                  range = 475,   projSpeed = 1000, },
+ 	['Vayne']       = {true, spell = _Q,                  range = 300,   projSpeed = 1000, },
++	['Wukong']      = {true, spell = _E,                  range = 625,   projSpeed = 1400, },
+ }
+ 
+ -- Spell cooldown check
