@@ -1,4 +1,4 @@
-local version = "1.01"
+local version = "1.00"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Thresh.lua".."?rand="..math.random(1,10000)
@@ -99,6 +99,7 @@ isAGapcloserUnit = {
 	['XinZhao']     = {true, spell = _E,                  range = 650,   projSpeed = 2000, },
 	['Yasuo']       = {true, spell = _E,                  range = 475,   projSpeed = 1000, },
 	['Vayne']       = {true, spell = _Q,                  range = 300,   projSpeed = 1000, },
+	['Wukong']      = {true, spell = _E,                  range = 625,   projSpeed = 1400, },
 }
 
 -- Spell cooldown check
@@ -158,7 +159,7 @@ function CastQ2()
 end
 
 function CastWEngage(Target)
-	if settings.combo.w and GetDistance(Target) <= 200 then	
+	if myHero:GetSpellData(_Q).name == "threshqleap" and settings.combo.w and GetDistance(Target) <= 200 then	
 		local bestAlly = nil
 		
 		for i = 1, heroManager.iCount, 1 do
@@ -433,7 +434,6 @@ end
 function CustomUpdateBuff(unit,buff)
 	if unit and unit.type == myHero.type and buff.name == "ThreshQ" then
 		if unit.team ~= myHero.team then
-			CastWCombo(getTarg())
 			CastQ2()
 		end
 	end
