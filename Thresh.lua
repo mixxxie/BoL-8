@@ -1,4 +1,4 @@
-local version = "1.06"
+local version = "1.07"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Thresh.lua".."?rand="..math.random(1,10000)
@@ -35,7 +35,6 @@ if VIP_USER and FileExist(LIB_PATH .. "/DivinePred.lua") then
 	qpred = LineSS(1900,1100, 100, .5, 0)
 end
 
-enemyChamps = {}
 pred = nil
 
 ----------------------
@@ -368,11 +367,6 @@ function OnLoad()
 
 	if autoupdate then
 		update()
-	end
-
-	for i = 1, heroManager.iCount do
-    	local hero = heroManager:GetHero(i)
-		if hero.team ~= myHero.team then enemyChamps[""..hero.networkID] = DPTarget(hero) end
 	end
 
 	ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1100, DAMAGE_MAGIC, true)
