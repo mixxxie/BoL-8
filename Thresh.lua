@@ -1,4 +1,4 @@
-local version = "1.03"
+local version = "1.04"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Thresh.lua".."?rand="..math.random(1,10000)
@@ -235,6 +235,31 @@ function CastWLowHP()
 	end
 end
 
+function CastWOnApproaching()
+	if settings.auto.approachingW then
+		for i = 1, heroManager.iCount, 1 do
+			local ally = heroManager:getHero(i)
+				
+			if ally.team == myHero.team  and not ally.dead and ally.charName ~= myHero.charName then
+				if allies[i] and spells.w.ready and GetDistance(ally) < spells.w.range + 250 and GetDistance(ally) > 700 then
+					local allyZ = ally.z - allies[i].z
+					local allyX = ally.x - allies[i].x
+					local allyAngle = math.atan2(allyZ,allyX) * 180 / math.pi
+					
+					local playerZ = myHero.z - ally.z
+					local playerX = myHero.x - ally.x
+					local playerAngle = math.atan2(playerZ,playerX) * 180 / math.pi
+					
+					if (allyAngle - playerAngle) ^ 2 < 900 then
+						local x, z = wPosition(myHero, ally, 300)
+						CastSpell(_W, x, z)
+					end
+				end
+			end
+		end
+	end
+end
+
 function CastEPull(Target)
     if settings.combo.e then
 		if ValidTarget(Target) and spells.e.ready and GetDistance(Target) <= spells.e.range then
@@ -260,7 +285,6 @@ function CastR()
 end
 
 function CastEGap()
-	PrintChat("step5")
 	if spells.e.ready then
         if settings.e.gapClose then
             if not spellExpired and (GetTickCount() - informationTable.spellCastedTick) <= (informationTable.spellRange/informationTable.spellSpeed)*1000 then
@@ -314,6 +338,24 @@ function wPosition(player, target, dist)
 	
 	return target.x + dist * xVector / distance, target.z + dist * zVector / distance
 end
+
+function updatePositions()
+	for i = 1, heroManager.iCount, 1 do
+		local ally = heroManager:getHero(i)
+			
+        if ally.team == myHero.team  and not ally.dead and ally.charName ~= myHero.charName then
+			if allies[i] then
+				if allies[i].x ~= ally.x and allies[i].z ~= ally.z and math.sqrt((allies[i].x - ally.x) ^ 2 + (allies[i].z - ally.z) ^ 2) > 150 then
+					allies[i] = {x = ally.x, z = ally.z}
+				end
+			else
+				allies[i] = {x = ally.x, z = ally.z}
+			end
+		end
+	end
+	
+	DelayAction(function() updatePositions() end, 0.5)
+end
 ----------------------
 --      Hooks       --
 ----------------------
@@ -336,11 +378,13 @@ function OnLoad()
 	HPred = HPrediction()
 	hpload = true
 	
+	allies = { }
 	Champ = { } 
 	for i, enemy in pairs(GetEnemyHeroes()) do 
 		Champ[i] = enemy.charName
 	end
 	
+	updatePositions()
 	Menu()
 
 	DelayAction(orbwalkCheck,7)
@@ -354,7 +398,7 @@ end
 -- Tick hook
 function OnTick()
 	readyCheck()
-
+	
 	ts:update()
 	Target = getTarg()
 	
@@ -367,6 +411,7 @@ function OnTick()
 	CastR()
 	CastWEngage(Target)
 	CastWLowHP()
+	CastWOnApproaching()
 end
 
 -- Drawing hook
@@ -481,11 +526,12 @@ function Menu()
 		if Champ[5] ~= nil then settings.q:addParam("champ5", "Use on "..Champ[5], SCRIPT_PARAM_ONOFF, true) end
 		
 	settings:addSubMenu("[" .. myHero.charName.. "] - Auto", "auto")
-		settings.auto:addParam("auto", "Use automatically", SCRIPT_PARAM_ONOFF, true)
+		settings.auto:addParam("auto", "Use ULT automatically", SCRIPT_PARAM_ONOFF, true)
 		settings.auto:addParam("ultMinimum", "ULT if hits x enemies", SCRIPT_PARAM_SLICE, 2, 1, 5, 0)
 		settings.auto:addParam("w", "Use W to save low HP", SCRIPT_PARAM_ONOFF, true)
 		settings.auto:addParam("hpW", "Use W at what % health", SCRIPT_PARAM_SLICE, 25, 0, 100, 0)
 		settings.auto:addParam("blitzcrank", "Save when hooked by Blitzcrank", SCRIPT_PARAM_ONOFF, true)
+		settings.auto:addParam("approachingW", "Beta: Use W on allies comming to you", SCRIPT_PARAM_ONOFF, true)
 	
 	settings:addSubMenu("[" .. myHero.charName.. "] - Auto-Interrupt", "interrupt")
 		for i, a in pairs(GetEnemyHeroes()) do
