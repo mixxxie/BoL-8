@@ -1,4 +1,4 @@
-local version = "1.08"
+local version = "1.09"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Thresh.lua".."?rand="..math.random(1,10000)
@@ -314,7 +314,7 @@ end
 function getTarg()
 	ts:update()
 	if _G.AutoCarry and ValidTarget(_G.AutoCarry.Crosshair:GetTarget()) then _G.AutoCarry.Crosshair:SetSkillCrosshairRange(1200) return _G.AutoCarry.Crosshair:GetTarget() end		
-	if ValidTarget(SelectedTarget) then return SelectedTarget end
+	if ValidTarget(SelectedTarget) and SelectedTarget.type == myHero.type then return SelectedTarget end
 	if MMALoaded and ValidTarget(_G.MMA_Target) then return _G.MMA_Target end
 	return ts.target
 end
