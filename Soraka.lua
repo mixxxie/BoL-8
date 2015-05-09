@@ -1,4 +1,4 @@
-local version = "1.04"
+local version = "1.05"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Soraka.lua".."?rand="..math.random(1,10000)
@@ -30,7 +30,6 @@ require("VPrediction") --vpred
 require("DivinePred") -- divinepred
 require("HPrediction") -- hpred
 
-local processTime  = os.clock()*1000
 local enemyChamps = {}
 local dp = DivinePred()
 local pred = nil
@@ -89,8 +88,7 @@ end
 --  Cast functions  --
 ----------------------
 
-local qpred = CircleSS(math.huge, 970, 150, .25, 1300)
-local wpred = LineSS(math.huge, 925, 210, .25, math.huge)
+local qpred = CircleSS(1300, 970, 150, .25, math.huge)
 
 function CastQ(minEnemies)
 	local closestdistance = 975 + 250
@@ -238,7 +236,6 @@ function OnLoad()
 	end
 
 	ts = TargetSelector(TARGET_LOW_HP, 600, DAMAGE_PHYSICAL, false, true)
-	creep = minionManager(MINION_ENEMY, 200, myHero, MINION_SORT_HEALTH_ASC)
 	pred = VPrediction()
 	HPred = HPrediction()
 	hpload = true
@@ -248,15 +245,8 @@ function OnLoad()
 	DelayAction(orbwalkCheck,7)
 
 	if hpload then
-		Spell_Q.type['Soraka'] = "DelayCircle"
-  		Spell_Q.delay['Soraka'] = .25
-  		Spell_Q.range['Soraka'] = 975
-  		Spell_Q.radius['Soraka'] = 250
-		Spell_Q.speed['Soraka'] = 1300
-  		Spell_E.type['Soraka'] = "PromptCircle"
-  		Spell_E.delay['Soraka'] = .25
-  		Spell_E.range['Soraka'] = 925
-  		Spell_E.radius['Soraka'] = 250
+		HPred:AddSpell("Q", 'Soraka', {type = "DelayCircle", delay = 0.25, range = 1050, radius = 250, speed=1300})
+		HPred:AddSpell("E", 'Soraka', {type = "PromptCircle", delay = 0.25, range = 925, radius = 250})
   	end
 end
 
