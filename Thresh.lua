@@ -1,4 +1,4 @@
-local version = "1.02"
+local version = "1.03"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Thresh.lua".."?rand="..math.random(1,10000)
@@ -130,25 +130,27 @@ end
 local qpred = LineSS(1900,1100, 100, .5, 0)
 
 function CastQ(unit)
-    if ValidTarget(unit) and GetDistance(unit) <= settings.combo.qRange then
-        if settings.pred == 1 then
-            local castPos, chance, pos = pred:GetLineCastPosition(unit, .5, 100, 1100, 1900, myHero, false)
-            if  spells.q.ready and chance >= 2 then
-                CastSpell(_Q, castPos.x, castPos.z)
-            end
-        elseif settings.pred == 2 then
-            local targ = DPTarget(unit)
-            local state,hitPos,perc = dp:predict(targ, qpred)
-            if spells.q.ready and state == SkillShot.STATUS.SUCCESS_HIT then
-                CastSpell(_Q, hitPos.x, hitPos.z)
-            end
-        elseif settings.pred == 3 then
-            local pos, chance = HPred:GetPredict("Q", unit, myHero) 
-            if chance > 0 and spells.q.ready then
-                CastSpell(_Q, pos.x, pos.z)
-            end
-        end
-    end
+	if ValidTarget(unit) and GetDistance(unit) <= settings.combo.qRange then
+		if (unit.charName == Champ[1] and settings.q.champ1) or (unit.charName == Champ[2] and settings.q.champ2) or (unit.charName == Champ[3] and settings.q.champ3) or (unit.charName == Champ[4] and settings.q.champ4) or (unit.charName == Champ[5] and settings.q.champ5) then
+			if settings.pred == 1 then
+				local castPos, chance, pos = pred:GetLineCastPosition(unit, .5, 100, 1100, 1900, myHero, false)
+				if  spells.q.ready and chance >= 2 then
+					CastSpell(_Q, castPos.x, castPos.z)
+				end
+			elseif settings.pred == 2 then
+				local targ = DPTarget(unit)
+				local state,hitPos,perc = dp:predict(targ, qpred)
+				if spells.q.ready and state == SkillShot.STATUS.SUCCESS_HIT then
+					CastSpell(_Q, hitPos.x, hitPos.z)
+				end
+			elseif settings.pred == 3 then
+				local pos, chance = HPred:GetPredict("Q", unit, myHero) 
+				if chance > 0 and spells.q.ready then
+					CastSpell(_Q, pos.x, pos.z)
+				end
+			end
+		end
+	end
 end
 
 function CastQ2()
@@ -158,13 +160,13 @@ function CastQ2()
 end
 
 function CastWEngage(Target)
-	if myHero:GetSpellData(_Q).name == "threshqleap" and settings.combo.w and GetDistance(Target) <= 200 then	
+	if settings.combo.w and ValidTarget(Target) and GetDistance(Target) <= 200 then	
 		local bestAlly = nil
 		
 		for i = 1, heroManager.iCount, 1 do
             local ally = heroManager:getHero(i)
 			
-            if ally.team == myHero.team and ally.name ~= myHero.name then		
+            if ally.team == myHero.team and ally.name ~= myHero.name and not ally.dead then		
 				if GetDistance(Target, ally) >= 600 and GetDistance(ally) <= spells.w.range then 
 					if ValidTarget(bestAlly) then
 						if GetDistance(ally) >= GetDistance(bestAlly) then
@@ -191,7 +193,7 @@ function CastWCombo(Target)
 		for i = 1, heroManager.iCount, 1 do
             local ally = heroManager:getHero(i)
 			
-            if ally.team == myHero.team and ally.name ~= myHero.name then		
+            if ally.team == myHero.team and ally.name ~= myHero.name  and not ally.dead then		
 				if GetDistance(Target, ally) >= 600 and GetDistance(ally) <= spells.w.range then 
 					if ValidTarget(bestAlly) then
 						if GetDistance(ally) >= GetDistance(bestAlly) then
@@ -305,12 +307,12 @@ function getHealthPercent(unit)
     return (obj.health / obj.maxHealth) * 100
 end
 
-function wPosition(player, target, distance)
+function wPosition(player, target, dist)
 	local xVector = player.x - target.x
 	local zVector = player.z - target.z
 	local distance = math.sqrt(xVector * xVector + zVector * zVector)
 	
-	return target.x + distance * xVector / distance, target.z + distance * zVector / distance
+	return target.x + dist * xVector / distance, target.z + dist * zVector / distance
 end
 ----------------------
 --      Hooks       --
@@ -333,7 +335,12 @@ function OnLoad()
 	pred = VPrediction()
 	HPred = HPrediction()
 	hpload = true
-
+	
+	Champ = { } 
+	for i, enemy in pairs(GetEnemyHeroes()) do 
+		Champ[i] = enemy.charName
+	end
+	
 	Menu()
 
 	DelayAction(orbwalkCheck,7)
@@ -431,9 +438,11 @@ function OnProcessSpell(object, spellProc)
 end
 
 function CustomUpdateBuff(unit,buff)
-	if unit and unit.type == myHero.type and buff.name == "ThreshQ" then
-		if unit.team ~= myHero.team then
-			CastQ2()
+	if unit then
+		if unit.type == myHero.type then
+			if unit.team ~= myHero.team and buff.name == "ThreshQ" then
+				CastQ2()
+			end
 		end
 	end
 	
@@ -463,7 +472,14 @@ function Menu()
 		settings.combo:addParam("holdQ", "Hold Q before Jump", SCRIPT_PARAM_SLICE, 75, 0, 100, 0)
 		settings.combo:addParam("w", "Use W after Q", SCRIPT_PARAM_ONOFF, true)
 		settings.combo:addParam("e", "Use E to Pull", SCRIPT_PARAM_ONOFF, true)
-
+		
+	settings:addSubMenu("["..myHero.charName.."] - (Q) Settings", "q")	
+		if Champ[1] ~= nil then settings.q:addParam("champ1", "Use on "..Champ[1], SCRIPT_PARAM_ONOFF, true) end
+		if Champ[2] ~= nil then settings.q:addParam("champ2", "Use on "..Champ[2], SCRIPT_PARAM_ONOFF, true) end
+		if Champ[3] ~= nil then settings.q:addParam("champ3", "Use on "..Champ[3], SCRIPT_PARAM_ONOFF, true) end
+		if Champ[4] ~= nil then settings.q:addParam("champ4", "Use on "..Champ[4], SCRIPT_PARAM_ONOFF, true) end
+		if Champ[5] ~= nil then settings.q:addParam("champ5", "Use on "..Champ[5], SCRIPT_PARAM_ONOFF, true) end
+		
 	settings:addSubMenu("[" .. myHero.charName.. "] - Auto", "auto")
 		settings.auto:addParam("auto", "Use automatically", SCRIPT_PARAM_ONOFF, true)
 		settings.auto:addParam("ultMinimum", "ULT if hits x enemies", SCRIPT_PARAM_SLICE, 2, 1, 5, 0)
@@ -471,13 +487,6 @@ function Menu()
 		settings.auto:addParam("hpW", "Use W at what % health", SCRIPT_PARAM_SLICE, 25, 0, 100, 0)
 		settings.auto:addParam("blitzcrank", "Save when hooked by Blitzcrank", SCRIPT_PARAM_ONOFF, true)
 	
-	settings:addSubMenu("[" .. myHero.charName.. "] - Drawing", "draw")
-		settings.draw:addParam("line", "Draw Line", SCRIPT_PARAM_ONOFF, true)
-		settings.draw:addParam("q", "Draw Q", SCRIPT_PARAM_ONOFF, true)
-		settings.draw:addParam("w", "Draw W", SCRIPT_PARAM_ONOFF, true)
-		settings.draw:addParam("e", "Draw E", SCRIPT_PARAM_ONOFF, true)
-		settings.draw:addParam("target", "Draw Target", SCRIPT_PARAM_ONOFF, true)
-
 	settings:addSubMenu("[" .. myHero.charName.. "] - Auto-Interrupt", "interrupt")
 		for i, a in pairs(GetEnemyHeroes()) do
 			if Interrupt[a.charName] ~= nil then
@@ -486,6 +495,13 @@ function Menu()
 				end
 			end
 		end
+	
+	settings:addSubMenu("[" .. myHero.charName.. "] - Drawing", "draw")
+		settings.draw:addParam("line", "Draw Line", SCRIPT_PARAM_ONOFF, true)
+		settings.draw:addParam("q", "Draw Q", SCRIPT_PARAM_ONOFF, true)
+		settings.draw:addParam("w", "Draw W", SCRIPT_PARAM_ONOFF, true)
+		settings.draw:addParam("e", "Draw E", SCRIPT_PARAM_ONOFF, true)
+		settings.draw:addParam("target", "Draw Target", SCRIPT_PARAM_ONOFF, true)
 		
 	settings:addSubMenu("[" .. myHero.charName.. "] - Anti Gap-Close", "gapClose")
 		for _, enemy in pairs(GetEnemyHeroes()) do
