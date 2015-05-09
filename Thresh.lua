@@ -1,4 +1,4 @@
-local version = "1.04"
+local version = "1.05"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Thresh.lua".."?rand="..math.random(1,10000)
@@ -241,7 +241,7 @@ function CastWOnApproaching()
 			local ally = heroManager:getHero(i)
 				
 			if ally.team == myHero.team  and not ally.dead and ally.charName ~= myHero.charName then
-				if allies[i] and spells.w.ready and GetDistance(ally) < spells.w.range + 250 and GetDistance(ally) > 700 then
+				if allies[i] and spells.w.ready and GetDistance(ally) < spells.w.range + 300 and GetDistance(ally) > 800 then
 					local allyZ = ally.z - allies[i].z
 					local allyX = ally.x - allies[i].x
 					local allyAngle = math.atan2(allyZ,allyX) * 180 / math.pi
