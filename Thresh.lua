@@ -1,4 +1,4 @@
-local version = "1.10"
+local version = "1.11"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Thresh.lua".."?rand="..math.random(1,10000)
@@ -32,7 +32,7 @@ require("HPrediction")
 if VIP_USER and FileExist(LIB_PATH .. "/DivinePred.lua") then 
 	require "DivinePred" 
 	dp = DivinePred()
-	qpred = LineSS(1900,1100, 100, .5, 0)
+	qpred = LineSS(1900,1100, 100, 0.5, 0)
 end
 
 pred = nil
@@ -52,7 +52,6 @@ Interrupt = {
 	["Nunu"] = {charName = "Nunu", stop = {["AbsoluteZero"] = {name = "Absolute Zero", spellName = "AbsoluteZero", ult = true }}},
 	["Malzahar"] = {charName = "Malzahar", stop = {["AlZaharNetherGrasp"] = {name = "Nether Grasp", spellName = "AlZaharNetherGrasp", ult = true}}},
 	["Caitlyn"] = {charName = "Caitlyn", stop = {["CaitlynAceintheHole"] = {name = "Ace in the hole", spellName = "CaitlynAceintheHole", ult = true, projectileName = "caitlyn_ult_mis.troy"}}},
-	["FiddleSticks"] = {charName = "FiddleSticks", stop = {["Crowstorm"] = {name = "Crowstorm", spellName = "Crowstorm", ult = true}}},
 	["FiddleSticks"] = {charName = "FiddleSticks", stop = {["Crowstorm"] = {name = "Crowstorm", spellName = "Crowstorm", ult = true}}},
 	["Galio"] = {charName = "Galio", stop = {["GalioIdolOfDurand"] = {name = "Idole of Durand", spellName = "GalioIdolOfDurand", ult = true}}},
 	["Janna"] = {charName = "Janna", stop = {["ReapTheWhirlwind"] = {name = "Monsoon", spellName = "ReapTheWhirlwind", ult = true}}},
@@ -134,7 +133,7 @@ function CastQ(unit)
 	if ValidTarget(unit) and GetDistance(unit) <= settings.combo.qRange then
 		if (unit.charName == Champ[1] and settings.q.champ1) or (unit.charName == Champ[2] and settings.q.champ2) or (unit.charName == Champ[3] and settings.q.champ3) or (unit.charName == Champ[4] and settings.q.champ4) or (unit.charName == Champ[5] and settings.q.champ5) then
 			if settings.pred == 1 then
-				local castPos, chance, pos = pred:GetLineCastPosition(unit, .5, 100, 1100, 1900, myHero, false)
+				local castPos, chance, pos = pred:GetLineCastPosition(unit, .5, 100, 1100, 1900, myHero, true)
 				if  spells.q.ready and chance >= 2 then
 					CastSpell(_Q, castPos.x, castPos.z)
 				end
@@ -242,7 +241,7 @@ function CastWOnApproaching()
 			local ally = heroManager:getHero(i)
 				
 			if ally.team == myHero.team  and not ally.dead and ally.charName ~= myHero.charName then
-				if allies[i] and spells.w.ready and GetDistance(ally) < spells.w.range + 300 and GetDistance(ally) > 800 then
+				if allies[i] and spells.w.ready and GetDistance(ally) < spells.w.range + 300 and GetDistance(ally) > spells.w.range then
 					local allyZ = ally.z - allies[i].z
 					local allyX = ally.x - allies[i].x
 					local allyAngle = math.atan2(allyZ,allyX) * 180 / math.pi
@@ -287,23 +286,21 @@ end
 
 function CastEGap()
 	if spells.e.ready then
-        if settings.e.gapClose then
-            if not spellExpired and (GetTickCount() - informationTable.spellCastedTick) <= (informationTable.spellRange/informationTable.spellSpeed)*1000 then
-                local spellDirection     = (informationTable.spellEndPos - informationTable.spellStartPos):normalized()
-                local spellStartPosition = informationTable.spellStartPos + spellDirection
-                local spellEndPosition   = informationTable.spellStartPos + spellDirection * informationTable.spellRange
-                local heroPosition = Point(myHero.x, myHero.z)
+		if not spellExpired and (GetTickCount() - informationTable.spellCastedTick) <= (informationTable.spellRange/informationTable.spellSpeed)*1000 then
+			local spellDirection     = (informationTable.spellEndPos - informationTable.spellStartPos):normalized()
+			local spellStartPosition = informationTable.spellStartPos + spellDirection
+			local spellEndPosition   = informationTable.spellStartPos + spellDirection * informationTable.spellRange
+			local heroPosition = Point(myHero.x, myHero.z)
 
-                local lineSegment = LineSegment(Point(spellStartPosition.x, spellStartPosition.y), Point(spellEndPosition.x, spellEndPosition.y))
+			local lineSegment = LineSegment(Point(spellStartPosition.x, spellStartPosition.y), Point(spellEndPosition.x, spellEndPosition.y))
 
-                if lineSegment:distance(heroPosition) <= (not informationTable.spellIsAnExpetion and 65 or 200) then
-                    CastEPush(informationTable.spellSource)
-                end
-            else
-                spellExpired = true
-                informationTable = {}
-            end
-        end
+			if lineSegment:distance(heroPosition) <= (not informationTable.spellIsAnExpetion and 65 or 200) then
+				CastEPush(informationTable.spellSource)
+			end
+		else
+			spellExpired = true
+			informationTable = {}
+		end
 	end
 end
 
@@ -387,7 +384,7 @@ function OnLoad()
 	AddUpdateBuffCallback(CustomUpdateBuff)		
 
 	if hpload then
-		HPred:AddSpell("Q", 'Thresh', {type = "DelayLine", delay = 0.5, range = 1100, width = 150, speed=1900})
+		HPred:AddSpell("Q", 'Thresh', {collisionM = true, collisionH = true, type = "DelayLine", delay = 0.5, range = 1100, width = 150, speed=1900})
   	end
 end
 
@@ -417,7 +414,7 @@ function OnDraw()
 	Target = getTarg()
 	
 	if ValidTarget(Target) and settings.draw.line then 
-		local IsCollision = pred:CheckMinionCollision(Target, Target.pos, 0.5, 150, 1100, 1900, myHero.pos,nil, true)
+		local IsCollision = pred:CheckMinionCollision(Target, Target.pos, 0.5, 100, 1100, 1900, myHero.pos,nil, true)
 		DrawLine3D(myHero.x, myHero.y, myHero.z, Target.x, Target.y, Target.z, 5, IsCollision and ARGB(125, 255, 0,0) or ARGB(125, 0, 255,0))
 	end
 	
