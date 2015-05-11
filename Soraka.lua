@@ -1,4 +1,4 @@
-local version = "1.05"
+local version = "1.06"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Soraka.lua".."?rand="..math.random(1,10000)
@@ -49,7 +49,6 @@ Interrupt = {
 	["Nunu"] = {charName = "Nunu", stop = {["AbsoluteZero"] = {name = "Absolute Zero", spellName = "AbsoluteZero", ult = true }}},
 	["Malzahar"] = {charName = "Malzahar", stop = {["AlZaharNetherGrasp"] = {name = "Nether Grasp", spellName = "AlZaharNetherGrasp", ult = true}}},
 	["Caitlyn"] = {charName = "Caitlyn", stop = {["CaitlynAceintheHole"] = {name = "Ace in the hole", spellName = "CaitlynAceintheHole", ult = true, projectileName = "caitlyn_ult_mis.troy"}}},
-	["FiddleSticks"] = {charName = "FiddleSticks", stop = {["Crowstorm"] = {name = "Crowstorm", spellName = "Crowstorm", ult = true}}},
 	["FiddleSticks"] = {charName = "FiddleSticks", stop = {["Crowstorm"] = {name = "Crowstorm", spellName = "Crowstorm", ult = true}}},
 	["Galio"] = {charName = "Galio", stop = {["GalioIdolOfDurand"] = {name = "Idole of Durand", spellName = "GalioIdolOfDurand", ult = true}}},
 	["Janna"] = {charName = "Janna", stop = {["ReapTheWhirlwind"] = {name = "Monsoon", spellName = "ReapTheWhirlwind", ult = true}}},
@@ -178,6 +177,14 @@ function AutoHeal()
 	end
 end
 
+function autoE() 
+	for i, enemy in ipairs(GetEnemyHeroes()) do
+		if not enemy.canMove then
+			CastSpell(_E, enemy)
+		end
+	end
+end
+
 ----------------------
 --   Calculations   --
 ----------------------
@@ -274,6 +281,10 @@ function OnTick()
 	if settings.combo.comboKey then
 		CastQ(1)
 	end
+	
+	if settings.e.autoE then
+		autoE()
+	end
 end
 
 -- Drawing hook
@@ -330,6 +341,9 @@ function Menu()
         settings.heal:addParam("HealManager", "Heal allies under", SCRIPT_PARAM_SLICE, 65, 0, 100, 0)
         settings.heal:addParam("HPManager", "Don't heal under (my hp)", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
 
+	settings:addSubMenu("[" .. myHero.charName.. "] - Auto E", "e")        
+        settings.e:addParam("autoE", "Auto E on Immobile", SCRIPT_PARAM_ONOFF, true)
+		
 	settings:addSubMenu("[" .. myHero.charName.. "] - Auto R", "ult")
 		settings.ult:addParam("UseUlt", "Use ult", SCRIPT_PARAM_ONOFF, true)
         settings.ult:addParam("UltCast", "Auto Ultimate On: ", SCRIPT_PARAM_LIST, 3, {"Only Me", "Allies", "Both"})
