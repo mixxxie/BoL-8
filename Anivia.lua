@@ -1,4 +1,4 @@
-local version = "1.2"
+local version = "1.21"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Anivia.lua".."?rand="..math.random(1,10000)
@@ -117,7 +117,7 @@ end
  
 function GetCustomTarget()
 	TargetSelector:update()
-	if SelectedTarget ~= nil and ValidTarget(SelectedTarget, 1100) and (Ignore == nil or (Ignore.networkID ~= SelectedTarget.networkID)) then
+	if SelectedTarget ~= nil and ValidTarget(SelectedTarget, 1100) and SelectedTarget.type == myHero.type then
 		return SelectedTarget
 	end
 	if TargetSelector.target and not TargetSelector.target.dead and TargetSelector.target.type == myHero.type then
@@ -135,14 +135,15 @@ function CustomOnTick()
 			_G.AutoCarry.Orbwalker:Orbwalk(Target)
 		end
 	end
+	
 	ComboKey = Settings.combo.comboKey
 	autoR = Settings.SSettings.Rset.autoR
 	autoE = Settings.SSettings.Eset.autoE
 	Checks()
 	
-	DetQ()
 	CancelR()
 	KS()
+	DetQ()
 	
 	if autoE then
 		CastE()
@@ -317,12 +318,6 @@ function DetQ()
 				end
 			end
 		end
-	end
-	
-	if GetDistance(Target, Qobject) < 150 then
-		if Target.dead then return end
-	
-		CastSpell(_Q)
 	end
 end
 
