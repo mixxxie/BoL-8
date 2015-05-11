@@ -1,4 +1,4 @@
-local version = "1.12"
+local version = "1.2"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Anivia.lua".."?rand="..math.random(1,10000)
@@ -25,6 +25,14 @@ if AUTOUPDATE then
 end
 
 if myHero.charName ~= "Anivia" then return end   
+
+require("HPrediction")
+
+if VIP_USER and FileExist(LIB_PATH .. "/DivinePred.lua") then 
+	require "DivinePred" 
+	dp = DivinePred()
+	qpred = LineSS(850,1100, 150, 0.25, math.huge)
+end
 
 function OnLoad()
 	CheckVPred()
@@ -78,6 +86,13 @@ function CustomOnLoad()
 	TargetSelector = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1100, DAMAGE_MAGICAL, false, true)
 	Variables()
 	Menu()
+	
+	HPred = HPrediction()
+	hpload = true
+	
+	if hpload then
+		HPred:AddSpell("Q", 'Anivia', {type = "DelayLine", delay = 0.25, range = 1100, width = 150, speed=850})
+  	end
 end
  
 function CustomOnDraw()
@@ -216,6 +231,8 @@ function Menu()
 		Settings:addSubMenu("["..myHero.charName.."] - Orbwalking Settings", "Orbwalking")
 		SOWi:LoadToMenu(Settings.Orbwalking)
 	end   
+	
+	Settings:addParam("pred", "Prediction Type", SCRIPT_PARAM_LIST, 1, { "VPrediction", "DivinePred", "HPred"})
 end
  
 function Variables()
@@ -300,19 +317,34 @@ function DetQ()
 				end
 			end
 		end
-	else
-		if GetDistance(Target, Qobject) < 150 then
-			if Target.dead then return end
-		
-			CastSpell(_Q)
-		end
+	end
+	
+	if GetDistance(Target, Qobject) < 150 then
+		if Target.dead then return end
+	
+		CastSpell(_Q)
 	end
 end
 
 function CastQ(unit)
-	if unit ~= nil and GetDistance(unit) <= SkillQ.range and SkillQ.ready and Qobject == nil then                    
-		CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, true)       
-		CastSpell(_Q, CastPosition.x, CastPosition.z)
+	if unit ~= nil and GetDistance(unit) <= SkillQ.range and SkillQ.ready and Qobject == nil then
+		if Settings.pred == 1 then
+			local castPos, chance, pos = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero)
+			if chance >= 2 then
+				CastSpell(_Q, castPos.x, castPos.z)
+			end
+		elseif Settings.pred == 2 and VIP_USER then
+			local targ = DPTarget(unit)
+			local state,hitPos,perc = dp:predict(targ, qpred)
+			if state == SkillShot.STATUS.SUCCESS_HIT then
+				CastSpell(_Q, hitPos.x, hitPos.z)
+			end
+		elseif Settings.pred == 3 then
+			local pos, chance = HPred:GetPredict("Q", unit, myHero) 
+			if chance > 0 then
+				CastSpell(_Q, pos.x, pos.z)
+			end
+		end
 	end
 end    
 
@@ -343,7 +375,7 @@ function CancelR()
 	if Robject ~= nil and Rscript == true then
 		local rcount = 0
 		for i, enemy in pairs(myEnemyTable) do
-			if GetDistance(enemy, Robject) < SkillR.range then
+			if GetDistance(enemy, Robject) < SkillR.range and ValidTarget(enemy) and not enemy.dead then
 				rcount = rcount + 1
 			end
 		end
@@ -367,16 +399,16 @@ function KS()
 				Edmg = Edmg * 2
 			end
 			
-			if Settings.KS.ksQ and champ.health < Qdmg * 0.95 and ValidTarget(champ) and GetDistance(unit) <= SkillQ.range then
+			if Settings.KS.ksQ and champ.health < Qdmg * 0.95 and ValidTarget(champ) and GetDistance(champ)<= SkillQ.range then
 				CastQ(champ)
 			end
 			
-			if Settings.KS.ksE and GetDistance(unit) <= SkillE.range and champ.health < Edmg * 0.95 and ValidTarget(champ) then
+			if Settings.KS.ksE and GetDistance(champ) <= SkillE.range and champ.health < Edmg * 0.95 and ValidTarget(champ) then
 				CastSpell(_E, champ)
 			end
 			
 			if Settings.KS.ksR and GetDistance(champ) < SkillR.range and champ.health < Rdmg and ValidTarget(champ) then
-				CastR(unit)
+				CastR(champ)
 			end
 			
 			if Settings.KS.ksI and GetDistance(champ) < 500 and champ.health < Idmg and ValidTarget(champ) then
