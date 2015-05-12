@@ -1,4 +1,4 @@
-local version = "1.12"
+local version = "1.13"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Soraka.lua".."?rand="..math.random(1,10000)
@@ -191,7 +191,7 @@ end
 
 function autoE() 
 	for i, enemy in ipairs(GetEnemyHeroes()) do
-		if not enemy.canMove then
+		if not enemy.canMove and GetDistance(enemy) < spells.e.range then
 			CastSpell(_E, enemy)
 		end
 	end
@@ -222,7 +222,7 @@ function GetBestHealTarget()
     local leastHpAlly = myHero
 
     for _, ally in ipairs(GetAllyHeroes()) do
-        local allyHpPct = getHealthPercent(ally) / GetEnemyCountInPos(myHero, 550)
+        local allyHpPct = getHealthPercent(ally) / (GetEnemyCountInPos(ally, 550) + 1)
         if allyHpPct <= leastHp and not ally.dead and GetDistance(ally) < spells.w.range then
             leastHp = allyHpPct
             leastHpAlly = ally
