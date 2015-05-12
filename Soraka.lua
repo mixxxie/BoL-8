@@ -1,4 +1,4 @@
-local version = "1.09"
+local version = "1.10"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Soraka.lua".."?rand="..math.random(1,10000)
@@ -27,10 +27,10 @@ end
 if myHero.charName ~= "Soraka" then return end   
 
 require("VPrediction") --vpred
-require("DivinePred") -- divinepred
+require("HPrediction") -- hpred
 
 if VIP_USER and FileExist(LIB_PATH .. "/DivinePred.lua") then 
-	require("HPrediction") -- hpred
+	require("DivinePred") -- divinepred
 	local dp = DivinePred()
 	local qpred = CircleSS(1300, 970, 150, .25, math.huge)
 end
@@ -71,19 +71,7 @@ end
 
 -- Orbwalker check
 function orbwalkCheck()
-	if _G.AutoCarry then
-		PrintChat("SA:C detected, support enabled.")
-		SACLoaded = true
-	elseif _G.MMA_Loaded then
-		PrintChat("MMA detected, support enabled.")
-		MMALoaded = true
-	else
-		PrintChat("SA:C/MMA not running, loading SxOrbWalk.")
-		require("SxOrbWalk")
-		SxMenu = scriptConfig("SxOrbWalk", "SxOrbb")
-		SxOrb:LoadToMenu(SxMenu)
-		SACLoaded = false
-	end
+
 end
 
 ----------------------
