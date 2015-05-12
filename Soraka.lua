@@ -1,4 +1,4 @@
-local version = "1.11"
+local version = "1.12"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Soraka.lua".."?rand="..math.random(1,10000)
@@ -71,7 +71,31 @@ end
 
 -- Orbwalker check
 function orbwalkCheck()
-
+	if _G.AutoCarry then
+		PrintChat("SA:C detected, support enabled.")
+		SACLoaded = true
+	elseif _G.MMA_Loaded then
+		PrintChat("MMA detected, support enabled.")
+		MMALoaded = true
+	else
+		if false then
+			PrintChat("SA:C/MMA not running, loading SxOrbWalk.")
+			require("SxOrbWalk")
+			SxMenu = scriptConfig("SxOrbWalk", "SxOrbb")
+			SxOrb:LoadToMenu(SxMenu)
+			SACLoaded = false
+		else
+			SOWp = true
+			SACLoaded = false
+			require "SOW"
+			
+			SOWi = SOW(pred)
+			SOWi:RegisterAfterAttackCallback(AutoAttackReset)
+			
+			settings:addSubMenu("["..myHero.charName.."] - Orbwalking Settings", "Orbwalking")
+			SOWi:LoadToMenu(settings.Orbwalking)
+		end
+	end
 end
 
 ----------------------
@@ -350,7 +374,6 @@ function Menu()
 				end
 			end
 		end
-	
 			
     settings:addParam("pred", "Prediction Type", SCRIPT_PARAM_LIST, 1, { "VPrediction", "DivinePred", "HPred"})
 end

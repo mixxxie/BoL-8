@@ -1,4 +1,4 @@
-local version = "1.11"
+local version = "1.12"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Thresh.lua".."?rand="..math.random(1,10000)
@@ -117,11 +117,23 @@ function orbwalkCheck()
 		PrintChat("MMA detected, support enabled.")
 		MMALoaded = true
 	else
-		PrintChat("SA:C/MMA not running, loading SxOrbWalk.")
-		require("SxOrbWalk")
-		SxMenu = scriptConfig("SxOrbWalk", "SxOrbb")
-		SxOrb:LoadToMenu(SxMenu)
-		SACLoaded = false
+		if false then
+			PrintChat("SA:C/MMA not running, loading SxOrbWalk.")
+			require("SxOrbWalk")
+			SxMenu = scriptConfig("SxOrbWalk", "SxOrbb")
+			SxOrb:LoadToMenu(SxMenu)
+			SACLoaded = false
+		else
+			SOWp = true
+			SACLoaded = false
+			require "SOW"
+			
+			SOWi = SOW(pred)
+			SOWi:RegisterAfterAttackCallback(AutoAttackReset)
+			
+			settings:addSubMenu("["..myHero.charName.."] - Orbwalking Settings", "Orbwalking")
+			SOWi:LoadToMenu(settings.Orbwalking)
+		end
 	end
 end
 
