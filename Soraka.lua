@@ -1,4 +1,4 @@
-local version = "1.06"
+local version = "1.07"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Soraka.lua".."?rand="..math.random(1,10000)
@@ -28,10 +28,13 @@ if myHero.charName ~= "Soraka" then return end
 
 require("VPrediction") --vpred
 require("DivinePred") -- divinepred
-require("HPrediction") -- hpred
 
-local enemyChamps = {}
-local dp = DivinePred()
+if VIP_USER and FileExist(LIB_PATH .. "/DivinePred.lua") then 
+	require("HPrediction") -- hpred
+	local dp = DivinePred()
+	local qpred = CircleSS(1300, 970, 150, .25, math.huge)
+end
+
 local pred = nil
 
 ----------------------
@@ -86,9 +89,6 @@ end
 ----------------------
 --  Cast functions  --
 ----------------------
-
-local qpred = CircleSS(1300, 970, 150, .25, math.huge)
-
 function CastQ(minEnemies)
 	local closestdistance = 975 + 250
 	local enemycount = 0
@@ -112,7 +112,7 @@ function CastQ(minEnemies)
             if  spells.q.ready and chance >= 2 then
                 CastSpell(_Q, castPos.x, castPos.z)
             end
-        elseif settings.pred == 2 then
+        elseif settings.pred == 2 and  VIP_USER then
             local targ = DPTarget(unit)
             local state,hitPos,perc = dp:predict(targ, qpred)
             if spells.q.ready and state == SkillShot.STATUS.SUCCESS_HIT then
@@ -235,11 +235,6 @@ function OnLoad()
 
 	if autoupdate then
 		update()
-	end
-
-	for i = 1, heroManager.iCount do
-    	local hero = heroManager:GetHero(i)
-		if hero.team ~= myHero.team then enemyChamps[""..hero.networkID] = DPTarget(hero) end
 	end
 
 	ts = TargetSelector(TARGET_LOW_HP, 600, DAMAGE_PHYSICAL, false, true)
