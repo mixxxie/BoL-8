@@ -1,4 +1,4 @@
-local version = "1.07"
+local version = "1.08"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Soraka.lua".."?rand="..math.random(1,10000)
@@ -35,6 +35,7 @@ if VIP_USER and FileExist(LIB_PATH .. "/DivinePred.lua") then
 	local qpred = CircleSS(1300, 970, 150, .25, math.huge)
 end
 
+local enemyChamps = {}
 local pred = nil
 
 ----------------------
@@ -235,6 +236,13 @@ function OnLoad()
 
 	if autoupdate then
 		update()
+	end
+
+	if VIP_USER then
+		for i = 1, heroManager.iCount do
+			local hero = heroManager:GetHero(i)
+			if hero.team ~= myHero.team then enemyChamps[""..hero.networkID] = DPTarget(hero) end
+		end
 	end
 
 	ts = TargetSelector(TARGET_LOW_HP, 600, DAMAGE_PHYSICAL, false, true)
