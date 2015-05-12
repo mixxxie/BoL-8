@@ -1,4 +1,4 @@
-local version = "1.10"
+local version = "1.11"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Soraka.lua".."?rand="..math.random(1,10000)
@@ -30,9 +30,9 @@ require("VPrediction") --vpred
 require("HPrediction") -- hpred
 
 if VIP_USER and FileExist(LIB_PATH .. "/DivinePred.lua") then 
-	require("DivinePred") -- divinepred
-	local dp = DivinePred()
-	local qpred = CircleSS(1300, 970, 150, .25, math.huge)
+	require "DivinePred" 
+	dp = DivinePred()
+	qpred = CircleSS(1300, 970, 150, .25, math.huge)
 end
 
 local pred = nil
