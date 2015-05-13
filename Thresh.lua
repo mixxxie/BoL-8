@@ -1,4 +1,4 @@
-local version = "1.12"
+local version = "1.13"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Thresh.lua".."?rand="..math.random(1,10000)
@@ -142,7 +142,7 @@ end
 ----------------------
 
 function CastQ(unit)
-	if ValidTarget(unit) and GetDistance(unit) <= settings.combo.qRange then
+	if ValidTarget(unit) and GetDistance(unit) <= settings.combo.qRange and not myHero:GetSpellData(_Q).name == "threshqleap" then
 		if (unit.charName == Champ[1] and settings.q.champ1) or (unit.charName == Champ[2] and settings.q.champ2) or (unit.charName == Champ[3] and settings.q.champ3) or (unit.charName == Champ[4] and settings.q.champ4) or (unit.charName == Champ[5] and settings.q.champ5) then
 			if settings.pred == 1 then
 				local castPos, chance, pos = pred:GetLineCastPosition(unit, .5, 100, 1100, 1900, myHero, true)
@@ -166,7 +166,7 @@ function CastQ(unit)
 end
 
 function CastQ2()
-	if settings.combo.autoJump then
+	if settings.combo.autoJump and myHero:GetSpellData(_Q).name == "threshqleap" then
 		DelayAction(function() CastSpell(_Q, myHero) end, ((15 / 1000) * settings.combo.holdQ))
 	end
 end
@@ -366,6 +366,16 @@ function updatePositions()
 	
 	DelayAction(function() updatePositions() end, 0.5)
 end
+
+function isRecall(hero)
+	if hero ~= nil and ValidTarget(hero) then 
+		for i = 1, hero.buffCount, 1 do
+			local buff = hero:getBuff(i)
+			if buff == "Recall" or buff == "SummonerTeleport" or buff == "RecallImproved" then return true end
+		end
+    end
+	return false
+end
 ----------------------
 --      Hooks       --
 ----------------------
@@ -413,10 +423,12 @@ function OnTick()
 		CastEPull(Target)
 	end
 	
-	CastR()
-	CastWEngage(Target)
-	CastWLowHP()
-	CastWOnApproaching()
+	if not isRecall(myHero) then
+		CastR()
+		CastWEngage(Target)
+		CastWLowHP()
+		CastWOnApproaching()
+	end
 end
 
 -- Drawing hook
