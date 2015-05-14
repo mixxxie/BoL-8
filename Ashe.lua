@@ -1,4 +1,4 @@
-local version = "1.01"
+local version = "1.02"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Ashe.lua".."?rand="..math.random(1,10000)
@@ -163,7 +163,6 @@ function OnLoad()
 	Menu()
 
 	DelayAction(orbwalkCheck,7)
-	AddUpdateBuffCallback(CustomUpdateBuff)	
 end
 
 -- Tick hook
@@ -219,16 +218,6 @@ function OnDraw()
 	
 	if settings.draw.w and spells.w.ready then
 		DrawCircle(myHero.x, myHero.y, myHero.z, spells.w.range, 0xFFFF0000)
-	end
-end
-
-function CustomUpdateBuff(unit,buff)
-	if unit then
-		if unit.type == myHero.type then
-			if unit.team ~= myHero.team and buff.name == "asheqcastready" then
-				canCastQ = true
-			end
-		end
 	end
 end
 
