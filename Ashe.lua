@@ -1,4 +1,4 @@
-local version = "1.0"
+local version = "1.01"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Ashe.lua".."?rand="..math.random(1,10000)
@@ -152,7 +152,7 @@ end
 -- Init hook
 function OnLoad()
 	print("<font color='#009DFF'>[Ashe]</font><font color='#FFFFFF'> has loaded!</font> <font color='#2BFF00'>[v"..version.."]</font>")
-	print("<font color='#009DFF'>[Ashe]</font><font color='#FFFFFF'> - do NOT reload script while you have Frost buff</font>")
+	print("<font color='#009DFF'>[Ashe]</font><font color='#FFFFFF'> Do NOT reload script while you have Frost buff</font>")
 
 	if autoupdate then
 		update()
@@ -163,6 +163,7 @@ function OnLoad()
 	Menu()
 
 	DelayAction(orbwalkCheck,7)
+	AddUpdateBuffCallback(CustomUpdateBuff)	
 end
 
 -- Tick hook
@@ -172,7 +173,9 @@ function OnTick()
 	
 	if settings.combo.comboKey and ValidTarget(Target) then
 		if settings.combo.w then
-			CastW(Target)
+			if settings.combo.dontW and not wKSSoon() then
+				CastW(Target)
+			end
 		end
 		
 		if settings.combo.r and GetDistance(Target) < settings.combo.rRange then
@@ -190,7 +193,9 @@ function OnTick()
 	
 	if settings.w.autoW and ValidTarget(Target) and not isRecall(myHero) then
 		if getManaPercent() > settings.w.autoWmana then
-			CastW(Target)
+			if settings.combo.dontW and not wKSSoon() then
+				CastW(Target)
+			end
 		end
 	end
 	
@@ -217,8 +222,18 @@ function OnDraw()
 	end
 end
 
+function CustomUpdateBuff(unit,buff)
+	if unit then
+		if unit.type == myHero.type then
+			if unit.team ~= myHero.team and buff.name == "asheqcastready" then
+				canCastQ = true
+			end
+		end
+	end
+end
+
 function OnCreateObj(object)
-	if GetDistance(object) < 20 then
+	if GetDistance(object) < 100 then
 		if object.name == "Ashe_Base_Q_ready.troy" then
 			canCastQ = true
 		end
@@ -226,7 +241,7 @@ function OnCreateObj(object)
 end
 
 function OnDeleteObj(object)
-	if GetDistance(object) < 20 then
+	if GetDistance(object) < 100 then
 		if object.name == "Ashe_Base_Q_ready.troy" then
 			canCastQ = false
 		end
@@ -259,9 +274,10 @@ function Menu()
 		settings.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 		settings.combo:addParam("q", "Use Q", SCRIPT_PARAM_ONOFF, true)
 		settings.combo:addParam("w", "Use W", SCRIPT_PARAM_ONOFF, true)
+		settings.combo:addParam("dontW", "Dont use W if can use it to KS soon", SCRIPT_PARAM_ONOFF, true)
 		settings.combo:addParam("e", "Use E", SCRIPT_PARAM_ONOFF, true)
 		settings.combo:addParam("r", "Use R", SCRIPT_PARAM_ONOFF, true)
-		settings.combo:addParam("rRange", "KS with R range", SCRIPT_PARAM_SLICE, 1000, 1, 1500, 0)
+		settings.combo:addParam("rRange", "R range", SCRIPT_PARAM_SLICE, 1000, 1, 1500, 0)
 		settings.combo:permaShow("comboKey")
 		
 	settings:addSubMenu("[" .. myHero.charName.. "] - Auto W", "w")
@@ -273,10 +289,11 @@ function Menu()
 		settings.ult:permaShow("fireKey")
 	
 	settings:addSubMenu("[" .. myHero.charName.. "] - Killsteal Settings", "ks")
+		settings.ks:addParam("w", "KS with W", SCRIPT_PARAM_ONOFF, true)
 		settings.ks:addParam("r", "KS with R", SCRIPT_PARAM_ONOFF, true)
 		settings.ks:addParam("rRange", "KS with R range", SCRIPT_PARAM_SLICE, 1000, 1, 1500, 0)
 	
-	settings:addSubMenu("Items Settings", "item")
+	settings:addSubMenu("[" .. myHero.charName.. "] - Items Settings", "item")
 		settings.item:addParam("BOTRK", "Use Ruined King", SCRIPT_PARAM_ONOFF, true)
 		settings.item:addParam("BC", "Use Bilgewater Cutlass", SCRIPT_PARAM_ONOFF, true)
 		settings.item:addParam("YMG", "Use Youmouu's Ghostblade", SCRIPT_PARAM_ONOFF, true)
@@ -338,12 +355,22 @@ function distance(x , z)
 	return math.sqrt((myHero.x - x) ^ 2 + (myHero.z - z) ^ 2) 
 end
 
+function wKSSoon()
+	for i, enemy in pairs(GetEnemyHeroes()) do
+		if GetDistance(enemy) < spells.w.range and getDmg("W", enemy, myHero) * 2 > enemy.health and not enemy.dead then
+			return true
+		end
+	end
+	
+	return false
+end
+
 ----------------------
 --  Cast functions  --
 ----------------------
 
 function CastQ(Target)
-	if spells.q.ready and canCastQ and GetDistance(Target) < MyTrueRange then
+	if spells.q.ready and canCastQ and GetDistance(Target) < 800 then
 		CastSpell(_Q)
 	end
 end
@@ -378,14 +405,13 @@ function CastE()
 			if enemyTick[i] == nil then
 				enemyTick[i] = os.clock() * 1000
 			end
-
-			unittraveled = enemy.ms * (os.clock() * 1000 - enemyTick[i])
+			
 			if lastPosition[i] ~= nil then
-				if unittraveled < 1000 and distance(lastPosition[i].x, lastPosition[i].z) < 1000 then
+				if (os.clock() * 1000 - enemyTick[i]) < 1000 and distance(lastPosition[i].x, lastPosition[i].z) < 1000 then
 					CastSpell(_E, lastPosition[i].x, lastPosition[i].z)
 				end
 			end
-		elseif enemy.team ~= myHero.team and enemy.visible then
+		elseif enemy.team ~= myHero.team and enemy.visible and not enemy.dead then
 			enemyTick[i] = nil
 			lastPosition[i] = {x = enemy.x, z = enemy.z}
 		end
@@ -395,7 +421,7 @@ end
 function CastR(unit)
 	if ValidTarget(unit) and spells.r.ready then
 		if settings.pred == 1 then
-			local castPos, chance, pos = pred:GetLineCastPosition(unit, spells.r.delay, spells.r.width, spells.r.range, spells.r.speed, myHero, true)
+			local castPos, chance, pos = pred:GetLineCastPosition(unit, spells.r.delay, spells.r.width, spells.r.range, spells.r.speed, myHero, false)
 			if chance >= 2 then
 				CastSpell(_R, castPos.x, castPos.z)
 			end
@@ -415,9 +441,18 @@ end
 function Killsteal()
 	local enemies = GetEnemyHeroes()
 	for i, enemy in pairs(enemies) do
+		if settings.ks.w then
+			if GetDistance(enemy) < spells.w.range and ValidTarget(enemy) and not enemy.dead then
+				if getDmg("W", enemy, myHero) * 0.95 > enemy.health then
+					CastW(enemy)
+				end
+			end
+		end
+	
+	
 		if settings.ks.r then
-			if GetDistance(enemy) < settings.ks.rRange and ValidTarget(enemy) then
-				if getDmg("R", enemy, myHero) > enemy.health then
+			if GetDistance(enemy) < settings.ks.rRange and ValidTarget(enemy) and not enemy.dead then
+				if getDmg("R", enemy, myHero) * 0.95 > enemy.health then
 					CastR(enemy)
 				end
 			end
