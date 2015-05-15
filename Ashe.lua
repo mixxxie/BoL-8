@@ -1,4 +1,4 @@
-local version = "1.04"
+local version = "1.05"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Ashe.lua".."?rand="..math.random(1,10000)
@@ -109,7 +109,7 @@ end
 --   Calculations   --
 ----------------------
 
-function getTarg(t)
+function getTarg()
 	ts:update()
 	if _G.AutoCarry and ValidTarget(_G.AutoCarry.Crosshair:GetTarget()) then _G.AutoCarry.Crosshair:SetSkillCrosshairRange(1200) return _G.AutoCarry.Crosshair:GetTarget() end		
 	if ValidTarget(SelectedTarget) and SelectedTarget.type == myHero.type then return SelectedTarget end
@@ -164,7 +164,6 @@ function OnLoad()
 
 	DelayAction(orbwalkCheck,7)
 	AddUpdateBuffCallback(CustomUpdateBuff)	
-	AddDeleteBuffCallback(CustomDeleteBuff)	
 end
 
 -- Tick hook
@@ -172,7 +171,7 @@ function OnTick()
 	readyCheck()
 	Target = getTarg()
 	
-	if settings.combo.comboKey and ValidTarget(Target) then
+	if (settings.combo.comboKey or settings.combo.comboKeyNoUlt) and ValidTarget(Target) then
 		if settings.combo.w then
 			if settings.combo.dontW and not wKSSoon() then
 				CastW(Target)
@@ -200,8 +199,12 @@ function OnTick()
 		end
 	end
 	
-	if settings.ult.fireKey and ValidTarget(Target) then
-		CastR(Target)
+	if settings.ult.fireKey and ValidTarget(Target) and settings.combo.comboKey then
+		if settings.combo.immobileR and not Target.canMove then
+			CastR(Target)
+		elseif not settings.combo.immobileR then
+			CastR(Target)
+		end
 	end
 	
 	Killsteal()
@@ -228,16 +231,6 @@ function CustomUpdateBuff(unit,buff)
 		if unit.type == myHero.type then
 			if unit.team ~= myHero.team and buff.name == "asheqcastready" then
 				canCastQ = true
-			end
-		end
-	end
-end
-
-function CustomDeleteBuff(unit,buff)
-	if unit then
-		if unit.type == myHero.type then
-			if unit.team ~= myHero.team and buff.name == "asheqcastready" then
-				canCastQ = false
 			end
 		end
 	end
@@ -283,11 +276,13 @@ function Menu()
 	
 	settings:addSubMenu("[" .. myHero.charName.. "] - Combo", "combo")
 		settings.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+		settings.combo:addParam("comboKeyNoUlt", "Combo Key WITHOUT Ult", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
 		settings.combo:addParam("q", "Use Q", SCRIPT_PARAM_ONOFF, true)
 		settings.combo:addParam("w", "Use W", SCRIPT_PARAM_ONOFF, true)
 		settings.combo:addParam("dontW", "Dont use W if can use it to KS soon", SCRIPT_PARAM_ONOFF, true)
 		settings.combo:addParam("e", "Use E", SCRIPT_PARAM_ONOFF, true)
 		settings.combo:addParam("r", "Use R", SCRIPT_PARAM_ONOFF, true)
+		settings.combo:addParam("immobileR", "Only use R on Immobile", SCRIPT_PARAM_ONOFF, false)
 		settings.combo:addParam("rRange", "R range", SCRIPT_PARAM_SLICE, 1000, 1, 1500, 0)
 		settings.combo:permaShow("comboKey")
 		
