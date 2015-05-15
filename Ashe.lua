@@ -1,4 +1,4 @@
-local version = "1.08"
+local version = "1.09"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Ashe.lua".."?rand="..math.random(1,10000)
@@ -26,14 +26,40 @@ end
 
 if myHero.charName ~= "Ashe" then return end   
 
-require "VPrediction"
-require "HPrediction"
+if not FileExist(LIB_PATH .. "/VPrediction.lua") then
+	PrintChat("This script wont work without VPrediction. Please download it.")
+	return
+end
 
-if VIP_USER and FileExist(LIB_PATH .. "/DivinePred.lua") then 
-	require "DivinePred" 
-	dp = DivinePred()
-	wpred = LineSS(2000, 1200, 50, 0.25, 0)
-	rpred = LineSS(1600, math.huge, 130, 0.25, math.huge)
+require "VPrediction"
+
+if FileExist(LIB_PATH .. "/HPrediction.lua") then
+	require "HPrediction"
+	useHP = true
+else
+	useHP = false
+	PrintChat("For better prediction please download HPrediction. The script WILL work without it though.")
+end
+
+if VIP_USER then
+	if FileExist(LIB_PATH .. "/DivinePred.lua") then
+		require "DivinePred" 
+		useDP = true
+		dp = DivinePred()
+		wpred = LineSS(2000, 1200, 50, 0.25, 0)
+		rpred = LineSS(1600, math.huge, 130, 0.25, math.huge)
+		
+	else
+		useDP = false
+		PrintChat("For better prediction please download DPrediction. The script WILL work without it though.")
+	end
+end
+
+if FileExist(LIB_PATH .. "/spellDmg.lua") then
+	require "spellDmg"
+else	
+	PrintChat("This script wont work without spellDmg library. Please download it and save it as 'spellDmg.lua'")
+	return
 end
 
 ----------------------
@@ -158,7 +184,6 @@ end
 -- Init hook
 function OnLoad()
 	print("<font color='#009DFF'>[Ashe]</font><font color='#FFFFFF'> has loaded!</font> <font color='#2BFF00'>[v"..version.."]</font>")
-	print("<font color='#009DFF'>[Ashe]</font><font color='#FFFFFF'> Do NOT reload script while you have Frost buff</font>")
 
 	if autoupdate then
 		update()
@@ -166,9 +191,12 @@ function OnLoad()
 
 	ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1200, DAMAGE_PHYSICAL, true)
 	pred = VPrediction()
-	HPred = HPrediction()
-	HPred:AddSpell("W", 'Ashe', {collisionM = true, collisionH = true, delay = spells.w.delay, range = spells.w.range, speed = spells.w.speed, type = "DelayLine", width = spells.w.width})
-	HPred:AddSpell("R", 'Ashe', {delay = spells.r.delay, range = math.huge, speed = spells.r.speed, type = "DelayLine", width = spells.r.width})
+	
+	if useHP then
+		HPred = HPrediction()
+		HPred:AddSpell("W", 'Ashe', {collisionM = true, collisionH = true, delay = spells.w.delay, range = spells.w.range, speed = spells.w.speed, type = "DelayLine", width = spells.w.width})
+		HPred:AddSpell("R", 'Ashe', {delay = spells.r.delay, range = math.huge, speed = spells.r.speed, type = "DelayLine", width = spells.r.width})
+	end
 	
 	Menu()
 
@@ -196,7 +224,7 @@ function OnTick()
 		end
 		
 		if settings.combo.r and ValidTarget(Target) and settings.combo.comboKey and GetDistance(Target) < settings.combo.rRange then
-			if settings.combo.immobileR and not Target.canMove then
+			if settings.combo.immobileR and Target.canMove == false then
 				CastR(Target)
 			elseif not settings.combo.immobileR then
 				CastR(Target)
@@ -403,7 +431,7 @@ function CastW(unit)
 			if chance >= 2 then
 				CastSpell(_W, castPos.x, castPos.z)
 			end
-		elseif settings.pred == 2 and VIP_USER and (os.clock() * 1000 - lastWCheck) > 200 then	
+		elseif settings.pred == 2 and VIP_USER and (os.clock() * 1000 - lastWCheck) > 200 and useDP then	
 			local targ = DPTarget(unit)
 			local state,hitPos,perc = dp:predict(targ, wpred)
 			
@@ -412,7 +440,7 @@ function CastW(unit)
 			if state == SkillShot.STATUS.SUCCESS_HIT then
 				CastSpell(_W, hitPos.x, hitPos.z)
 			end
-		elseif settings.pred == 3 then
+		elseif settings.pred == 3 and useHP then
 			local WPos, WHitChance = HPred:GetPredict("W", unit, myHero)
   
 			if WHitChance > 0 then
@@ -452,7 +480,7 @@ function CastR(unit)
 			if chance >= 2 then
 				CastSpell(_R, castPos.x, castPos.z)
 			end
-		elseif settings.pred == 2 and VIP_USER and (os.clock() * 1000 - lastRCheck) > 200 then	
+		elseif settings.pred == 2 and VIP_USER and (os.clock() * 1000 - lastRCheck) > 200 and useDP then	
 			local targ = DPTarget(unit)
 			local state,hitPos,perc = dp:predict(targ, rpred)
 			
@@ -461,7 +489,7 @@ function CastR(unit)
 			if state == SkillShot.STATUS.SUCCESS_HIT then
 				CastSpell(_R, hitPos.x, hitPos.z)
 			end
-		elseif settings.pred == 3 then
+		elseif settings.pred == 3 and useHP then
 			local RPos, RHitChance = HPred:GetPredict("R", unit, myHero)
   
 			if RHitChance > 0 then
