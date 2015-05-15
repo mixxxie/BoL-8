@@ -1,4 +1,4 @@
-local version = "1.06"
+local version = "1.07"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Ashe.lua".."?rand="..math.random(1,10000)
@@ -45,7 +45,8 @@ enemyTick = {}
 lastPosition = {}
 lastWCheck = 0
 lastRCheck = 0
-canCastQ = false
+qStackCount = 0
+qStackExpire = 0
 
 Item = {
 		BOTRK = {Slot = nil, Ready = nil},
@@ -87,6 +88,10 @@ function readyCheck()
 	Item.BOTRK.Ready = (Item.BOTRK.Slot ~= nil) and (myHero:CanUseSpell(Item.BOTRK.Slot) == READY)
 	Item.BC.Ready = (Item.BC.Slot ~= nil) and (myHero:CanUseSpell(Item.BC.Slot) == READY)
 	Item.YMG.Ready = (Item.YMG.Slot ~= nil) and (myHero:CanUseSpell(Item.YMG.Slot) == READY)
+	
+	if qStackCount > 0 and qStackExpire < os.clock() * 1000 then
+		qStackCount = 0
+	end
 end
 
 -- Orbwalker check
@@ -177,6 +182,12 @@ function OnTick()
 	Target = getTarg()
 	
 	if (settings.combo.comboKey or settings.combo.comboKeyNoUlt) and ValidTarget(Target) then
+		UseItems(Target)
+		
+		if settings.combo.q then
+			CastQ()
+		end
+		
 		if settings.combo.w then
 			if settings.combo.onlyWGap and GetDistance(Target) < MyTrueRange then return end
 			if settings.combo.dontW and not wKSSoon() then
@@ -190,10 +201,6 @@ function OnTick()
 			elseif not settings.combo.immobileR then
 				CastR(Target)
 			end
-		end
-		
-		if settings.combo.q then
-			CastQ(Target)
 		end
 		
 		if settings.combo.e then
@@ -214,7 +221,6 @@ function OnTick()
 	end
 	
 	Killsteal()
-	UseItems()
 end
 
 -- Drawing hook
@@ -235,25 +241,26 @@ end
 function CustomUpdateBuff(unit,buff)
 	if unit then
 		if unit.type == myHero.type then
-			if unit.team ~= myHero.team and buff.name == "asheqcastready" then
-				canCastQ = true
+			if unit.team == myHero.team then
+				if buff.name == "AsheQ" then
+					if qStackCount < 5 then
+						qStackCount = qStackCount + 1
+					else
+						qStackCount = 5
+					end
+					
+					qStackExpire = (os.clock() + 4) * 1000
+				end
+				
+				if buff.name == "asheqcastready" then
+					qStackCount = 5
+					qStackExpire = (os.clock() + 4) * 1000
+				end
+				
+				if buff.name == "asheqbuff" then
+					qStackCount = 0
+				end
 			end
-		end
-	end
-end
-
-function OnCreateObj(object)
-	if GetDistance(object) < 100 then
-		if object.name == "Ashe_Base_Q_ready.troy" then
-			canCastQ = true
-		end
-	end
-end
-
-function OnDeleteObj(object)
-	if GetDistance(object) < 100 then
-		if object.name == "Ashe_Base_Q_ready.troy" then
-			canCastQ = false
 		end
 	end
 end
@@ -382,8 +389,8 @@ end
 --  Cast functions  --
 ----------------------
 
-function CastQ(Target)
-	if spells.q.ready and canCastQ and GetDistance(Target) < MyTrueRange then
+function CastQ()
+	if spells.q.ready and qStackCount == 5 and GetEnemyCountInPos(myHero, 700) > 0 then
 		CastSpell(_Q)
 	end
 end
