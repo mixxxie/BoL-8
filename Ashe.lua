@@ -1,4 +1,4 @@
-local version = "1.05"
+local version = "1.06"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Ashe.lua".."?rand="..math.random(1,10000)
@@ -26,7 +26,8 @@ end
 
 if myHero.charName ~= "Ashe" then return end   
 
-require("VPrediction")
+require "VPrediction"
+require "HPrediction"
 
 if VIP_USER and FileExist(LIB_PATH .. "/DivinePred.lua") then 
 	require "DivinePred" 
@@ -160,6 +161,10 @@ function OnLoad()
 
 	ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1200, DAMAGE_PHYSICAL, true)
 	pred = VPrediction()
+	HPred = HPrediction()
+	HPred:AddSpell("W", 'Ashe', {collisionM = true, collisionH = true, delay = spells.w.delay, range = spells.w.range, speed = spells.w.speed, type = "DelayLine", width = spells.w.width})
+	HPred:AddSpell("R", 'Ashe', {delay = spells.r.delay, range = math.huge, speed = spells.r.speed, type = "DelayLine", width = spells.r.width})
+	
 	Menu()
 
 	DelayAction(orbwalkCheck,7)
@@ -173,13 +178,18 @@ function OnTick()
 	
 	if (settings.combo.comboKey or settings.combo.comboKeyNoUlt) and ValidTarget(Target) then
 		if settings.combo.w then
+			if settings.combo.onlyWGap and GetDistance(Target) < MyTrueRange then return end
 			if settings.combo.dontW and not wKSSoon() then
 				CastW(Target)
 			end
 		end
 		
-		if settings.combo.r and GetDistance(Target) < settings.combo.rRange then
-			CastR(Target)
+		if settings.combo.r and ValidTarget(Target) and settings.combo.comboKey and GetDistance(Target) < settings.combo.rRange then
+			if settings.combo.immobileR and not Target.canMove then
+				CastR(Target)
+			elseif not settings.combo.immobileR then
+				CastR(Target)
+			end
 		end
 		
 		if settings.combo.q then
@@ -199,12 +209,8 @@ function OnTick()
 		end
 	end
 	
-	if settings.ult.fireKey and ValidTarget(Target) and settings.combo.comboKey then
-		if settings.combo.immobileR and not Target.canMove then
-			CastR(Target)
-		elseif not settings.combo.immobileR then
-			CastR(Target)
-		end
+	if settings.ult.fireKey and ValidTarget(Target) then
+		CastR(Target)
 	end
 	
 	Killsteal()
@@ -276,10 +282,11 @@ function Menu()
 	
 	settings:addSubMenu("[" .. myHero.charName.. "] - Combo", "combo")
 		settings.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
-		settings.combo:addParam("comboKeyNoUlt", "Combo Key WITHOUT Ult", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
+		settings.combo:addParam("comboKeyNoUlt", "Combo Key WITHOUT Ult", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("Y"))
 		settings.combo:addParam("q", "Use Q", SCRIPT_PARAM_ONOFF, true)
 		settings.combo:addParam("w", "Use W", SCRIPT_PARAM_ONOFF, true)
 		settings.combo:addParam("dontW", "Dont use W if can use it to KS soon", SCRIPT_PARAM_ONOFF, true)
+		settings.combo:addParam("onlyWGap", "Only use W if not in range for AA", SCRIPT_PARAM_ONOFF, true)
 		settings.combo:addParam("e", "Use E", SCRIPT_PARAM_ONOFF, true)
 		settings.combo:addParam("r", "Use R", SCRIPT_PARAM_ONOFF, true)
 		settings.combo:addParam("immobileR", "Only use R on Immobile", SCRIPT_PARAM_ONOFF, false)
@@ -319,7 +326,7 @@ function Menu()
 		settings.draw:addParam("w", "Draw W", SCRIPT_PARAM_ONOFF, true)
 		settings.draw:addParam("target", "Draw Target", SCRIPT_PARAM_ONOFF, true)
 	
-    settings:addParam("pred", "Prediction Type", SCRIPT_PARAM_LIST, 1, { "VPrediction", "DivinePred"})
+    settings:addParam("pred", "Prediction Type", SCRIPT_PARAM_LIST, 1, { "VPrediction", "DivinePred", "HPrediction"})
 end
 
 
@@ -397,6 +404,12 @@ function CastW(unit)
 			if state == SkillShot.STATUS.SUCCESS_HIT then
 				CastSpell(_W, hitPos.x, hitPos.z)
 			end
+		elseif settings.pred == 3 then
+			local WPos, WHitChance = HPred:GetPredict("W", unit, myHero)
+  
+			if WHitChance > 0 then
+				CastSpell(_W, WPos.x, WPos.z)
+			end
 		end
 	end
 end
@@ -439,6 +452,12 @@ function CastR(unit)
 			
 			if state == SkillShot.STATUS.SUCCESS_HIT then
 				CastSpell(_R, hitPos.x, hitPos.z)
+			end
+		elseif settings.pred == 3 then
+			local RPos, RHitChance = HPred:GetPredict("R", unit, myHero)
+  
+			if RHitChance > 0 then
+				CastSpell(_R, RPos.x, RPos.z)
 			end
 		end
 	end
