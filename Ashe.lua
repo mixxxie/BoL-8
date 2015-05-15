@@ -1,4 +1,4 @@
-local version = "1.07"
+local version = "1.08"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Ashe.lua".."?rand="..math.random(1,10000)
@@ -290,7 +290,7 @@ function Menu()
 	settings:addSubMenu("[" .. myHero.charName.. "] - Combo", "combo")
 		settings.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 		settings.combo:addParam("comboKeyNoUlt", "Combo Key WITHOUT Ult", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("Y"))
-		settings.combo:addParam("q", "Use Q", SCRIPT_PARAM_ONOFF, true)
+		settings.combo:addParam("q", "Use Q", SCRIPT_PARAM_ONKEYTOGGLE, true, string.byte("H"))
 		settings.combo:addParam("w", "Use W", SCRIPT_PARAM_ONOFF, true)
 		settings.combo:addParam("dontW", "Dont use W if can use it to KS soon", SCRIPT_PARAM_ONOFF, true)
 		settings.combo:addParam("onlyWGap", "Only use W if not in range for AA", SCRIPT_PARAM_ONOFF, true)
@@ -299,6 +299,7 @@ function Menu()
 		settings.combo:addParam("immobileR", "Only use R on Immobile", SCRIPT_PARAM_ONOFF, false)
 		settings.combo:addParam("rRange", "R range", SCRIPT_PARAM_SLICE, 1000, 1, 1500, 0)
 		settings.combo:permaShow("comboKey")
+		settings.combo:permaShow("q")
 		
 	settings:addSubMenu("[" .. myHero.charName.. "] - Auto W", "w")
 		settings.w:addParam("autoW", "Auto W", SCRIPT_PARAM_ONOFF, true)
@@ -471,8 +472,7 @@ function CastR(unit)
 end
 
 function Killsteal()
-	local enemies = GetEnemyHeroes()
-	for i, enemy in pairs(enemies) do
+	for i, enemy in pairs(GetEnemyHeroes()) do
 		if settings.ks.w then
 			if GetDistance(enemy) < spells.w.range and ValidTarget(enemy) and not enemy.dead then
 				if getDmg("W", enemy, myHero) * 0.95 > enemy.health then
