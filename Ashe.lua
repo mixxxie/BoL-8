@@ -1,4 +1,4 @@
-local version = "1.09"
+local version = "1.10"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Ashe.lua".."?rand="..math.random(1,10000)
@@ -200,7 +200,7 @@ function OnLoad()
 	
 	Menu()
 
-	DelayAction(orbwalkCheck,7)
+	DelayAction(orbwalkCheck,10)
 	AddUpdateBuffCallback(CustomUpdateBuff)	
 end
 
@@ -217,8 +217,8 @@ function OnTick()
 		end
 		
 		if settings.combo.w then
-			if settings.combo.onlyWGap and GetDistance(Target) < MyTrueRange then return end
-			if settings.combo.dontW and not wKSSoon() then
+			
+			if (settings.combo.dontW and wKSSoon()) == false and (settings.combo.onlyWGap and GetDistance(Target) < MyTrueRange) == false then
 				CastW(Target)
 			end
 		end
@@ -238,7 +238,7 @@ function OnTick()
 	
 	if settings.w.autoW and ValidTarget(Target) and not isRecall(myHero) then
 		if getManaPercent() > settings.w.autoWmana then
-			if settings.combo.dontW and not wKSSoon() then
+			if (settings.combo.dontW and wKSSoon()) == false then
 				CastW(Target)
 			end
 		end
