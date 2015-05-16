@@ -1,4 +1,4 @@
-local version = "1.10"
+local version = "1.11"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Ashe.lua".."?rand="..math.random(1,10000)
@@ -26,12 +26,12 @@ end
 
 if myHero.charName ~= "Ashe" then return end   
 
-if not FileExist(LIB_PATH .. "/VPrediction.lua") then
+if FileExist(LIB_PATH .. "/VPrediction.lua") then
+	require "VPrediction"
+else
 	PrintChat("This script wont work without VPrediction. Please download it.")
 	return
 end
-
-require "VPrediction"
 
 if FileExist(LIB_PATH .. "/HPrediction.lua") then
 	require "HPrediction"
@@ -74,11 +74,6 @@ lastRCheck = 0
 qStackCount = 0
 qStackExpire = 0
 
-Item = {
-		BOTRK = {Slot = nil, Ready = nil},
-		BC    = {Slot = nil, Ready = nil},
-		YMG   = {Slot = nil, Ready = nil}
-}
 
 MyTrueRange = (600 + GetDistance(myHero.minBBox))
 
@@ -106,14 +101,6 @@ Interrupt = {
 -- Spell cooldown check
 function readyCheck()
 	spells.q.ready, spells.w.ready, spells.e.ready, spells.r.ready = (myHero:CanUseSpell(_Q) == READY), (myHero:CanUseSpell(_W) == READY), (myHero:CanUseSpell(_E) == READY), (myHero:CanUseSpell(_R) == READY)
-	
-	Item.BOTRK.Slot = GetInventorySlotItem(3153)
-	Item.BC.Slot = GetInventorySlotItem(3144)
-	Item.YMG.Slot = GetInventorySlotItem(3142)
-
-	Item.BOTRK.Ready = (Item.BOTRK.Slot ~= nil) and (myHero:CanUseSpell(Item.BOTRK.Slot) == READY)
-	Item.BC.Ready = (Item.BC.Slot ~= nil) and (myHero:CanUseSpell(Item.BC.Slot) == READY)
-	Item.YMG.Ready = (Item.YMG.Slot ~= nil) and (myHero:CanUseSpell(Item.YMG.Slot) == READY)
 	
 	if qStackCount > 0 and qStackExpire < os.clock() * 1000 then
 		qStackCount = 0
@@ -210,8 +197,6 @@ function OnTick()
 	Target = getTarg()
 	
 	if (settings.combo.comboKey or settings.combo.comboKeyNoUlt) and ValidTarget(Target) then
-		UseItems(Target)
-		
 		if settings.combo.q then
 			CastQ()
 		end
@@ -357,11 +342,6 @@ function Menu()
 		settings.ks:addParam("w", "KS with W", SCRIPT_PARAM_ONOFF, true)
 		settings.ks:addParam("r", "KS with R", SCRIPT_PARAM_ONOFF, true)
 		settings.ks:addParam("rRange", "KS with R range", SCRIPT_PARAM_SLICE, 1000, 1, 1500, 0)
-	
-	settings:addSubMenu("[" .. myHero.charName.. "] - Items Settings", "item")
-		settings.item:addParam("BOTRK", "Use Ruined King", SCRIPT_PARAM_ONOFF, true)
-		settings.item:addParam("BC", "Use Bilgewater Cutlass", SCRIPT_PARAM_ONOFF, true)
-		settings.item:addParam("YMG", "Use Youmouu's Ghostblade", SCRIPT_PARAM_ONOFF, true)
 	
 	settings:addSubMenu("[" .. myHero.charName.. "] - Auto-Interrupt", "interrupt")
 		settings.interrupt:addParam("interruptRange", "Interrupt Range", SCRIPT_PARAM_SLICE, 1000, 1, 1500, 0)
@@ -531,28 +511,6 @@ function Killsteal()
 				if getDmg("R", enemy, myHero) * 0.95 > enemy.health then
 					CastR(enemy)
 				end
-			end
-		end
-	end
-end
-
-function UseItems(Target)
-	if Target ~= nil and ValidTarget(Target) then
-		if settings.item.BOTRK and GetDistance(Target) < 450 then
-			if Item.BOTRK.Ready then
-				CastSpell(Item.BOTRK.Slot, Target)
-			end
-		end
-
-		if settings.item.BC and GetDistance(Target) < 450 then
-			if Item.BC.Ready then
-				CastSpell(Item.BC.Slot, Target)
-			end
-		end
-
-		if settings.item.useYMG and GetDistance(Target) < MyTrueRange then
-			if Item.YMG.Ready then
-				CastSpell(Item.YMG.Slot)
 			end
 		end
 	end
