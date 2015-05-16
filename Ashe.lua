@@ -309,6 +309,22 @@ function OnProcessSpell(object, spellProc)
 	end
 end
 
+function OnCreateObj(object)
+	if GetDistance(object) < 100 then
+		if object.name == "Ashe_Base_Q_ready.troy" then
+			qStackCount = 5
+		end
+	end
+end
+
+function OnDeleteObj(object)
+	if GetDistance(object) < 100 then
+		if object.name == "Ashe_Base_Q_ready.troy" then
+			qStackCount = 0
+		end
+	end
+end
+
 -- Menu creation
 function Menu()
 	settings = scriptConfig("Ashe", "Zopper")
