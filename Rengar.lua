@@ -1,4 +1,4 @@
-local version = "1.0"
+local version = "1.01"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Rengar.lua".."?rand="..math.random(1,10000)
@@ -46,7 +46,7 @@ if VIP_USER then
 		require "DivinePred" 
 		useDP = true
 		dp = DivinePred()
-		wpred = LineSS(1500, 1000, 75, 0.25, 0)
+		epred = LineSS(1500, 1000, 75, 0.25, 0)
 		
 	else
 		useDP = false
@@ -284,7 +284,7 @@ function OnTick()
 	end
 
 	if settings.combo.comboKey and ValidTarget(Target) then	
-				if GetDistance(Target) < settings.combo.eMaxRange then
+		if GetDistance(Target) < settings.combo.eMaxRange then
 			if myHero.mana < 5 then
 				CastE(Target)
 			elseif myHero.mana == 5 and settings.combo.empE then
