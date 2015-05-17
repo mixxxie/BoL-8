@@ -1,4 +1,4 @@
-local version = "1.21"
+local version = "1.22"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Anivia.lua".."?rand="..math.random(1,10000)
@@ -310,7 +310,7 @@ function DetQ()
 	if Settings.SSettings.Qset.Qdet then
 		for i=1, heroManager.iCount, 1 do
 			local champ = heroManager:GetHero(i)
-			if champ.team ~= myHero.team then
+			if champ.team ~= myHero.team and ValidTarget(champ) then
 				if champ.dead then return end
 			
 				if GetDistance(champ, Qobject) < 150 then
@@ -322,7 +322,7 @@ function DetQ()
 end
 
 function CastQ(unit)
-	if unit ~= nil and GetDistance(unit) <= SkillQ.range and SkillQ.ready and Qobject == nil then
+	if unit ~= nil and GetDistance(unit) <= SkillQ.range and SkillQ.ready and Qobject == nil and ValidTarget(unit) and not unit.dead then
 		if Settings.pred == 1 then
 			local castPos, chance, pos = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero)
 			if chance >= 2 then
