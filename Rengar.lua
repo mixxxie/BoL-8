@@ -1,4 +1,4 @@
-local version = "1.01"
+local version = "1.02"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Rengar.lua".."?rand="..math.random(1,10000)
@@ -64,7 +64,6 @@ end
 ----------------------
 --     Variables    --
 ----------------------
-
 local priorityTable = {
     p5 = {"Alistar", "Amumu", "Blitzcrank", "Bard", "Braum", "ChoGath", "DrMundo", "Garen", "Gnar", "Hecarim", "Janna", "JarvanIV", "Leona", "Lulu", "Malphite", "Nami", "Nasus", "Nautilus", "Nunu","Olaf", "Rammus", "Renekton", "Sejuani", "Shen", "Shyvana", "Singed", "Sion", "Skarner", "Sona","Soraka", "Taric", "Thresh", "Volibear", "Warwick", "MonkeyKing", "Yorick", "Zac", "Zyra"},
     p4 = {"Aatrox", "Darius", "Elise", "Evelynn", "Galio", "Gangplank", "Gragas", "Irelia", "Jax","LeeSin", "Maokai", "Morgana", "Nocturne", "Pantheon", "Poppy", "Rengar", "Rumble", "Ryze", "Swain","Trundle", "Tryndamere", "Udyr", "Urgot", "Vi", "XinZhao", "RekSai"},
@@ -246,17 +245,6 @@ function OnProcessSpell(object, spellProc)
 		if spell.name == (type(isAGapcloserUnit[unit.charName].spell) == 'number' and unit:GetSpellData(isAGapcloserUnit[unit.charName].spell).name or isAGapcloserUnit[unit.charName].spell) and settings.gapClose[unit.charName] then
 			if spell.target ~= nil and spell.target.name == myHero.name or isAGapcloserUnit[unit.charName].spell == 'blindmonkqtwo' and myHero.mana == 5 then
 				CastE(unit)
-			else
-				spellExpired = false
-				informationTable = {
-					spellSource = unit,
-					spellCastedTick = GetTickCount(),
-					spellStartPos = Point(spell.startPos.x, spell.startPos.z),
-					spellEndPos = Point(spell.endPos.x, spell.endPos.z),
-					spellRange = isAGapcloserUnit[unit.charName].range,
-					spellSpeed = isAGapcloserUnit[unit.charName].projSpeed,
-					spellIsAnExpetion = isAGapcloserUnit[unit.charName].exeption or false,
-				}
 			end
 		end
 	end
@@ -268,8 +256,6 @@ function OnTick()
 	Target = getTarg()
 	
 	MyTrueRange = myHero.range + GetDistance(myHero.minBBox) + 50
-		
-	CastEGap()
 		
 	if settings.combo.comboKey and SxOrb ~= nil and settings.combo.stop then
 		if  GetDistance(myHero, mousePos) < settings.combo.stopRange then
@@ -429,26 +415,6 @@ function CastE(unit)
 			if EHitChance > 0 then
 				CastSpell(_E, EPos.x, EPos.z)
 			end
-		end
-	end
-end
-
-function CastEGap()
-	if spells.e.ready then
-		if not spellExpired and (GetTickCount() - informationTable.spellCastedTick) <= (informationTable.spellRange/informationTable.spellSpeed)*1000 then
-			local spellDirection     = (informationTable.spellEndPos - informationTable.spellStartPos):normalized()
-			local spellStartPosition = informationTable.spellStartPos + spellDirection
-			local spellEndPosition   = informationTable.spellStartPos + spellDirection * informationTable.spellRange
-			local heroPosition = Point(myHero.x, myHero.z)
-
-			local lineSegment = LineSegment(Point(spellStartPosition.x, spellStartPosition.y), Point(spellEndPosition.x, spellEndPosition.y))
-
-			if lineSegment:distance(heroPosition) <= (not informationTable.spellIsAnExpetion and 65 or 200) then
-				CastE(informationTable.spellSource)
-			end
-		else
-			spellExpired = true
-			informationTable = {}
 		end
 	end
 end
