@@ -1,4 +1,4 @@
-local version = "1.04"
+local version = "1.05"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Rengar.lua".."?rand="..math.random(1,10000)
@@ -249,7 +249,7 @@ function OnLoad()
 end
 
 function OnApplyBuff(source, unit, buff)
-	if unit == myHero and source == myHero and (buff.name == "rengarqbase" or buff.name == "rengarqemp") then
+	if unit == myHero and (buff.name == "rengarqbase" or buff.name == "rengarqemp") then
 		hasQ = true
 	end
 end
@@ -292,7 +292,7 @@ function OnTick()
 		SxOrb:ForceTarget(Target)
 	end
 
-	if hasQ and GetDistance(Target) < MyTrueRange then
+	if hasQ and ValidTarget(Target) and GetDistance(Target) < MyTrueRange then
 		myHero:Attack(Target)
 	end
 	
