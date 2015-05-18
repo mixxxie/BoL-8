@@ -1,4 +1,4 @@
-local version = "1.14"
+local version = "1.15"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Soraka.lua".."?rand="..math.random(1,10000)
@@ -194,7 +194,7 @@ end
 
 function autoE() 
 	for i, enemy in ipairs(GetEnemyHeroes()) do
-		if not enemy.canMove and GetDistance(enemy) < spells.e.range then
+		if not enemy.canMove and GetDistance(enemy) < spells.e.range and not enemy.dead then
 			CastSpell(_E, enemy)
 		end
 	end
