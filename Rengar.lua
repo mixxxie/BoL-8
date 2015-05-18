@@ -1,4 +1,4 @@
-local version = "1.03"
+local version = "1.04"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Rengar.lua".."?rand="..math.random(1,10000)
@@ -115,8 +115,16 @@ isAGapcloserUnit = {
 	['Vayne']       = {true, spell = _Q,                  range = 300,   projSpeed = 1000, },
 }
 
+items = {
+	['ItemTiamatCleave']          = {true, target = false },
+	['YoumusBlade']               = {true, target = false },
+	['BilgewaterCutlass']         = {true, target = true  },
+	['ItemSwordOfFeastAndFamine'] = {true, target = true  },
+}
+
 MyTrueRange = myHero.range + GetDistance(myHero.minBBox)
 lastECheck = 0
+hasQ = false
 
 spells = {}
 spells.q = {name = myHero:GetSpellData(_Q).name, ready = false}
@@ -240,6 +248,18 @@ function OnLoad()
 	DelayAction(orbwalkCheck,10)
 end
 
+function OnApplyBuff(source, unit, buff)
+	if unit == myHero and source == myHero and (buff.name == "rengarqbase" or buff.name == "rengarqemp") then
+		hasQ = true
+	end
+end
+
+function OnRemoveBuff(unit, buff)
+	if (buff.name == "rengarqbase" or buff.name == "rengarqemp") and unit == myHero then
+		hasQ = false
+	end
+end
+
 function OnProcessSpell(object, spellProc)
 	local unit = object
 	local spell = spellProc
@@ -268,14 +288,32 @@ function OnTick()
 		end
 	end
 	
-	if settings.combo.comboKey and ValidTarget(target) and GetDistance(Target) < MyTrueRange then
+	if settings.combo.comboKey and ValidTarget(Target) and GetDistance(Target) < MyTrueRange and SxOrb ~= nil then
 		SxOrb:ForceTarget(Target)
 	end
 
+	if hasQ and GetDistance(Target) < MyTrueRange then
+		myHero:Attack(Target)
+	end
+	
+	if settings.combo.comboKey and settings.combo.items and ValidTarget(Target) and GetDistance(Target) < MyTrueRange and MyTrueRange < 500 then
+		for slot = ITEM_1, ITEM_7 do
+			if items[myHero:GetSpellData(slot).name] then
+				if items[myHero:GetSpellData(slot).name].target then
+					CastSpell(slot, Target)
+				else
+					CastSpell(slot)
+				end
+			end
+		end
+	end
+	
 	if settings.combo.comboKey and ValidTarget(Target) then	
 		if GetDistance(Target) < settings.combo.eMaxRange then
 			if myHero.mana < 5 then
-				CastE(Target)
+				if MyTrueRange < 700 then
+					CastE(Target)
+				end
 			elseif myHero.mana == 5 and settings.combo.empE then
 				if MyTrueRange < 700 and GetDistance(Target) > settings.combo.empERange then
 					CastE(Target)
@@ -299,7 +337,7 @@ function OnDraw()
 	
 	Target = getTarg()
 	
-	if settings.draw.target and ValidTarget(Target) then
+	if settings.draw.target and Target ~= nil then
 		DrawCircle(Target.x, Target.y, Target.z, 150, 0xffffff00)
 	end
 
@@ -317,7 +355,7 @@ function OnDraw()
 end
 
 -- Menu creation
-function Menu()
+function Menu()	
 	settings = scriptConfig("Rengar", "Zopper")
 	TargetSelector.name = "Rengar"
 	settings:addTS(ts)
@@ -325,12 +363,13 @@ function Menu()
 	settings:addSubMenu("[" .. myHero.charName.. "] - Combo", "combo")
 		settings.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 		settings.combo:addParam("stop", "Stop if mouse above hero", SCRIPT_PARAM_ONOFF, true)
+		settings.combo:addParam("items", "Use items in combo", SCRIPT_PARAM_ONOFF, true)
 		settings.combo:addParam("stopRange", "Stop range", SCRIPT_PARAM_SLICE, 200,0,500,0)
 		settings.combo:addParam("empE", "Use Empowered E if enemy is far", SCRIPT_PARAM_ONOFF, true)
 		settings.combo:addParam("empERange", "Use if enemy is further than", SCRIPT_PARAM_SLICE, 500,0,1000,0)
 		settings.combo:addParam("eMaxRange", "Maximum range to use E", SCRIPT_PARAM_SLICE, 950,0,1000,0)
 		settings.combo:permaShow("comboKey")
-		
+	
 	settings:addSubMenu("[" .. myHero.charName.. "] - Auto Heal", "heal")
 		settings.heal:addParam("heal", "Use Auto Heal", SCRIPT_PARAM_ONOFF, true)
 		settings.heal:addParam("maxHP", "Auto Heal if below %", SCRIPT_PARAM_SLICE, 25,0,100,0)
