@@ -1,4 +1,4 @@
-local version = "1.15"
+local version = "1.16"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Thresh.lua".."?rand="..math.random(1,10000)
@@ -145,7 +145,7 @@ end
 ----------------------
 
 function CastQ(unit)
-	if ValidTarget(unit) and GetDistance(unit) <= settings.combo.qRange then
+	if ValidTarget(unit) and GetDistance(unit) <= settings.combo.qRange and myHero:GetSpellData(_Q).name ~= "threshqleap" then
 		if (unit.charName == Champ[1] and settings.q.champ1) or (unit.charName == Champ[2] and settings.q.champ2) or (unit.charName == Champ[3] and settings.q.champ3) or (unit.charName == Champ[4] and settings.q.champ4) or (unit.charName == Champ[5] and settings.q.champ5) then
 			if settings.pred == 1 then
 				local castPos, chance, pos = pred:GetLineCastPosition(unit, .5, 100, 1100, 1900, myHero, true)
@@ -421,9 +421,17 @@ function OnTick()
 	Target = getTarg()
 	
 	if settings.combo.comboKey then
-		CastQ(Target)
-		CastWCombo(Target)
-		CastEPull(Target)
+		if settings.combo.q then
+			CastQ(Target)
+		end
+		
+		if settings.combo.w then
+			CastWCombo(Target)
+		end
+			
+		if settings.combo.e then
+			CastEPull(Target)
+		end
 	end
 	
 	if not isRecall(myHero) then
