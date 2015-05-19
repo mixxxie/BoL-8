@@ -1,4 +1,4 @@
-local version = "1.18"
+local version = "1.19"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Soraka.lua".."?rand="..math.random(1,10000)
@@ -43,8 +43,9 @@ local pred = nil
 ----------------------
 --     Variables    --
 ----------------------
+loaded = false
 
-local spells = {}
+spells = {}
 spells.q = {name = myHero:GetSpellData(_Q).name, ready = false, range = 970, width = 250}
 spells.w = {name = myHero:GetSpellData(_W).name, ready = false, range = 550, width = nil}
 spells.e = {name = myHero:GetSpellData(_E).name, ready = false, range = 925, width = 250}
@@ -256,19 +257,27 @@ end
 
 -- Init hook
 function OnLoad()
-	print("<font color='#009DFF'>[Soraka]</font><font color='#FFFFFF'> has loaded!</font> <font color='#2BFF00'>[v"..version.."]</font>")
+	if not loaded then
+		loaded = true
+		print("<font color='#009DFF'>[Soraka]</font><font color='#FFFFFF'> has loaded!</font> <font color='#2BFF00'>[v"..version.."]</font>")
 
-	if autoupdate then
-		update()
+		if autoupdate then
+			update()
+		end
+
+		ts = TargetSelector(TARGET_LOW_HP, 600, DAMAGE_PHYSICAL, false, true)
+		pred = VPrediction()
+		HPred = HPrediction()
+		hpload = true
+
+		Menu()
+	
+		if hpload then
+			HPred:AddSpell("Q", 'Soraka', {type = "DelayCircle", delay = 0.25, range = 1050, radius = 250, speed=1300})
+			HPred:AddSpell("E", 'Soraka', {type = "PromptCircle", delay = 0.25, range = 925, radius = 250})
+		end
 	end
-
-	ts = TargetSelector(TARGET_LOW_HP, 600, DAMAGE_PHYSICAL, false, true)
-	pred = VPrediction()
-	HPred = HPrediction()
-	hpload = true
-
-	Menu()
-
+	
 	if _G.Reborn_Initialised then
         orbwalkCheck()
     elseif _G.Reborn_Loaded then
@@ -277,11 +286,6 @@ function OnLoad()
     else
         orbwalkCheck()
     end
-	
-	if hpload then
-		HPred:AddSpell("Q", 'Soraka', {type = "DelayCircle", delay = 0.25, range = 1050, radius = 250, speed=1300})
-		HPred:AddSpell("E", 'Soraka', {type = "PromptCircle", delay = 0.25, range = 925, radius = 250})
-  	end
 end
 
 -- Tick hook

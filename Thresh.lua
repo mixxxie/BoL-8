@@ -1,4 +1,4 @@
-local version = "1.18"
+local version = "1.19"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Thresh.lua".."?rand="..math.random(1,10000)
@@ -38,13 +38,15 @@ if VIP_USER and FileExist(LIB_PATH .. "/DivinePred.lua") then
 	qpred = LineSS(1900,1100, 100, 0.5, 0)
 end
 
-pred = nil
-
 ----------------------
 --     Variables    --
 ----------------------
 
-local spells = {}
+informationTable = {}
+loaded = false
+pred = nil
+
+spells = {}
 spells.q = {name = myHero:GetSpellData(_Q).name, ready = false, range = 1100, width = 100}
 spells.w = {name = myHero:GetSpellData(_W).name, ready = false, range = 950, width = nil}
 spells.e = {name = myHero:GetSpellData(_E).name, ready = false, range = 500, width = nil}
@@ -120,7 +122,7 @@ function orbwalkCheck()
 		PrintChat("MMA detected, support enabled.")
 		MMALoaded = true
 	else
-		if false then
+		if true then
 			PrintChat("SA:C/MMA not running, loading SxOrbWalk.")
 			require("SxOrbWalk")
 			SxMenu = scriptConfig("SxOrbWalk", "SxOrbb")
@@ -202,7 +204,7 @@ function CastWEngage(Target)
 end
 
 function CastWCombo(Target)
-	if myHero:GetSpellData(_Q).name == "threshqleap" and settings.combo.w then	
+	if ValidTarget(Target) and myHero:GetSpellData(_Q).name == "threshqleap" and settings.combo.w then	
 		local bestAlly = nil
 		
 		for i = 1, heroManager.iCount, 1 do
@@ -300,7 +302,7 @@ function CastR()
 end
 
 function CastEGap()
-	if spells.e.ready then
+	if spells.e.ready and informationTable.spellCastedTick ~= nil then
 		if not spellExpired and (GetTickCount() - informationTable.spellCastedTick) <= (informationTable.spellRange/informationTable.spellSpeed)*1000 then
 			local spellDirection     = (informationTable.spellEndPos - informationTable.spellStartPos):normalized()
 			local spellStartPosition = informationTable.spellStartPos + spellDirection
@@ -385,25 +387,34 @@ end
 
 -- Init hook
 function OnLoad()
-	print("<font color='#009DFF'>[Thresh]</font><font color='#FFFFFF'> has loaded!</font> <font color='#2BFF00'>[v"..version.."]</font>")
+	if not loaded then
+		loaded = true
+		print("<font color='#009DFF'>[Thresh]</font><font color='#FFFFFF'> has loaded!</font> <font color='#2BFF00'>[v"..version.."]</font>")
 
-	if autoupdate then
-		update()
-	end
+		if autoupdate then
+			update()
+		end
 
-	ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1100, DAMAGE_MAGIC, true)
-	pred = VPrediction()
-	HPred = HPrediction()
-	hpload = true
-	
-	allies = { }
-	Champ = { } 
-	for i, enemy in pairs(GetEnemyHeroes()) do 
-		Champ[i] = enemy.charName
+		ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1100, DAMAGE_MAGIC, true)
+		pred = VPrediction()
+		HPred = HPrediction()
+		hpload = true
+		
+		allies = { }
+		Champ = { } 
+		for i, enemy in pairs(GetEnemyHeroes()) do 
+			Champ[i] = enemy.charName
+		end
+		
+		updatePositions()
+		Menu()
+		
+		AddUpdateBuffCallback(CustomUpdateBuff)		
+
+		if hpload then
+			HPred:AddSpell("Q", 'Thresh', {collisionM = true, collisionH = true, type = "DelayLine", delay = 0.5, range = 1100, width = 150, speed=1900})
+		end
 	end
-	
-	updatePositions()
-	Menu()
 	
 	if _G.Reborn_Initialised then
         orbwalkCheck()
@@ -413,12 +424,6 @@ function OnLoad()
     else
         orbwalkCheck()
     end
-	
-	AddUpdateBuffCallback(CustomUpdateBuff)		
-
-	if hpload then
-		HPred:AddSpell("Q", 'Thresh', {collisionM = true, collisionH = true, type = "DelayLine", delay = 0.5, range = 1100, width = 150, speed=1900})
-  	end
 end
 
 -- Tick hook
@@ -447,6 +452,7 @@ function OnTick()
 		CastWEngage(Target)
 		CastWLowHP()
 		CastWOnApproaching()
+		CastEGap()
 	end
 end
 

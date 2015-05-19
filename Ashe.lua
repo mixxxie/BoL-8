@@ -1,4 +1,4 @@
-local version = "1.18"
+local version = "1.19"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Ashe.lua".."?rand="..math.random(1,10000)
@@ -61,7 +61,7 @@ end
 ----------------------
 --     Variables    --
 ----------------------
-
+loaded = false
 pred = nil
 enemyTick = {}
 lastPosition = {}
@@ -166,22 +166,27 @@ end
 
 -- Init hook
 function OnLoad()
-	print("<font color='#009DFF'>[Ashe]</font><font color='#FFFFFF'> has loaded!</font> <font color='#2BFF00'>[v"..version.."]</font>")
+	if not loaded then
+		loaded = true
+		print("<font color='#009DFF'>[Ashe]</font><font color='#FFFFFF'> has loaded!</font> <font color='#2BFF00'>[v"..version.."]</font>")
 
-	if autoupdate then
-		update()
-	end
+		if autoupdate then
+			update()
+		end
 
-	ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1200, DAMAGE_PHYSICAL, true)
-	pred = VPrediction()
-	
-	if useHP then
-		HPred = HPrediction()
-		HPred:AddSpell("W", 'Ashe', {collisionM = true, collisionH = true, delay = spells.w.delay, range = spells.w.range, speed = spells.w.speed, type = "DelayLine", width = spells.w.width})
-		HPred:AddSpell("R", 'Ashe', {delay = spells.r.delay, range = math.huge, speed = spells.r.speed, type = "DelayLine", width = spells.r.width})
+		ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1200, DAMAGE_PHYSICAL, true)
+		pred = VPrediction()
+		
+		if useHP then
+			HPred = HPrediction()
+			HPred:AddSpell("W", 'Ashe', {collisionM = true, collisionH = true, delay = spells.w.delay, range = spells.w.range, speed = spells.w.speed, type = "DelayLine", width = spells.w.width})
+			HPred:AddSpell("R", 'Ashe', {delay = spells.r.delay, range = math.huge, speed = spells.r.speed, type = "DelayLine", width = spells.r.width})
+		end
+		
+		Menu()
+			
+		AddUpdateBuffCallback(CustomUpdateBuff)	
 	end
-	
-	Menu()
 	
 	if _G.Reborn_Initialised then
         orbwalkCheck()
@@ -191,8 +196,6 @@ function OnLoad()
     else
         orbwalkCheck()
     end
-	
-	AddUpdateBuffCallback(CustomUpdateBuff)	
 end
 
 -- Tick hook

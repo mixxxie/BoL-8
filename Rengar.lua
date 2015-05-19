@@ -1,4 +1,4 @@
-local version = "1.08"
+local version = "1.09"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Rengar.lua".."?rand="..math.random(1,10000)
@@ -60,6 +60,8 @@ end
 ----------------------
 --     Variables    --
 ----------------------
+loaded = false
+
 local priorityTable = {
     p5 = {"Alistar", "Amumu", "Blitzcrank", "Bard", "Braum", "ChoGath", "DrMundo", "Garen", "Gnar", "Hecarim", "Janna", "JarvanIV", "Leona", "Lulu", "Malphite", "Nami", "Nasus", "Nautilus", "Nunu","Olaf", "Rammus", "Renekton", "Sejuani", "Shen", "Shyvana", "Singed", "Sion", "Skarner", "Sona","Soraka", "Taric", "Thresh", "Volibear", "Warwick", "MonkeyKing", "Yorick", "Zac", "Zyra"},
     p4 = {"Aatrox", "Darius", "Elise", "Evelynn", "Galio", "Gangplank", "Gragas", "Irelia", "Jax","LeeSin", "Maokai", "Morgana", "Nocturne", "Pantheon", "Poppy", "Rengar", "Rumble", "Ryze", "Swain","Trundle", "Tryndamere", "Udyr", "Urgot", "Vi", "XinZhao", "RekSai"},
@@ -248,21 +250,26 @@ end
 
 -- Init hook
 function OnLoad()
-	print("<font color='#009DFF'>[Rengar]</font><font color='#FFFFFF'> has loaded!</font> <font color='#2BFF00'>[v"..version.."]</font>")
+	if not loaded then
+		loaded = true
+		print("<font color='#009DFF'>[Rengar]</font><font color='#FFFFFF'> has loaded!</font> <font color='#2BFF00'>[v"..version.."]</font>")
 
-	if autoupdate then
-		update()
-	end
+		if autoupdate then
+			update()
+		end
 
-	ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1000, DAMAGE_PHYSICAL, true)
-	pred = VPrediction()
-	
-	if useHP then
-		HPred = HPrediction()
-		HPred:AddSpell("E", 'Rengar', {collisionM = true, collisionH = true, delay = spells.e.delay, range = spells.e.range, speed = spells.e.speed, type = "DelayLine", width = spells.e.width})
+		ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1000, DAMAGE_PHYSICAL, true)
+		pred = VPrediction()
+		
+		if useHP then
+			HPred = HPrediction()
+			HPred:AddSpell("E", 'Rengar', {collisionM = true, collisionH = true, delay = spells.e.delay, range = spells.e.range, speed = spells.e.speed, type = "DelayLine", width = spells.e.width})
+		end
+		
+		Menu()
+		
+		arrangePriority()
 	end
-	
-	Menu()
 	
 	if _G.Reborn_Initialised then
         orbwalkCheck()
@@ -272,8 +279,6 @@ function OnLoad()
     else
         orbwalkCheck()
     end
-	
-	arrangePriority()
 end
 
 function OnApplyBuff(source, unit, buff)
