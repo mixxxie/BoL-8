@@ -1,4 +1,4 @@
-local version = "1.19"
+local version = "1.20"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Thresh.lua".."?rand="..math.random(1,10000)
@@ -171,7 +171,7 @@ function CastQ(unit)
 end
 
 function CastQ2()
-	if settings.combo.autoJump and myHero:GetSpellData(_Q).name == "threshqleap" then
+	if settings.combo.autoJump and myHero:GetSpellData(_Q).name == "threshqleap" and settings.combo.comboKey then
 		DelayAction(function() CastSpell(_Q, myHero) end, ((15 / 1000) * settings.combo.holdQ))
 	end
 end
