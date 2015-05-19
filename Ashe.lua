@@ -1,4 +1,4 @@
-local version = "1.17"
+local version = "1.16"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Ashe.lua".."?rand="..math.random(1,10000)
@@ -56,13 +56,6 @@ if VIP_USER then
 		useDP = false
 		PrintChat("For better prediction please download DPrediction. The script WILL work without it though.")
 	end
-end
-
-if FileExist(LIB_PATH .. "/spellDmg.lua") then
-	require "spellDmg"
-else	
-	PrintChat("This script wont work without spellDmg library. Please download it and save it as 'spellDmg.lua'")
-	return
 end
 
 ----------------------
@@ -173,6 +166,15 @@ end
 
 -- Init hook
 function OnLoad()
+	if _G.Reborn_Initialised then
+        orbwalkCheck()
+    elseif _G.Reborn_Loaded then
+        DelayAction(OnLoad, 1)
+        return
+    else
+        orbwalkCheck()
+    end
+
 	print("<font color='#009DFF'>[Ashe]</font><font color='#FFFFFF'> has loaded!</font> <font color='#2BFF00'>[v"..version.."]</font>")
 
 	if autoupdate then
@@ -189,8 +191,6 @@ function OnLoad()
 	end
 	
 	Menu()
-
-	DelayAction(orbwalkCheck,10)
 	AddUpdateBuffCallback(CustomUpdateBuff)	
 end
 
@@ -224,7 +224,7 @@ function OnTick()
 		end
 	end
 	
-	if settings.w.autoW and ValidTarget(Target) and not isRecall(myHero) then
+	if (settings.w.autoW or settings.w.autoWKEyPress) and ValidTarget(Target) and not isRecall(myHero) then
 		if getManaPercent() > settings.w.autoWmana then
 			if (settings.combo.dontW and wKSSoon()) == false then
 				CastW(Target)
@@ -334,8 +334,11 @@ function Menu()
 		settings.combo:permaShow("q")
 		
 	settings:addSubMenu("[" .. myHero.charName.. "] - Auto W", "w")
-		settings.w:addParam("autoW", "Auto W", SCRIPT_PARAM_ONOFF, true)
+		settings.w:addParam("autoW", "Auto W Toggle", SCRIPT_PARAM_ONKEYTOGGLE, true, string.byte("G"))
+		settings.w:addParam("autoWKeyPress", "Auto W Key Press", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
 		settings.w:addParam("autoWmana", "Minimum Mana", SCRIPT_PARAM_SLICE, 40, 0, 100, 0)
+		settings.w:permaShow("autoW")
+		settings.w:permaShow("autoWKeyPress")
 	
 	settings:addSubMenu("[" .. myHero.charName.. "] - Ult Helper", "ult")
 		settings.ult:addParam("fireKey", "Fire ult on Target", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
