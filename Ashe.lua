@@ -337,6 +337,8 @@ function Menu()
 		settings.w:addParam("autoW", "Auto W Toggle", SCRIPT_PARAM_ONKEYTOGGLE, true, string.byte("G"))
 		settings.w:addParam("autoWKeyPress", "Auto W Key Press", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
 		settings.w:addParam("autoWmana", "Minimum Mana", SCRIPT_PARAM_SLICE, 40, 0, 100, 0)
+		settings.combo:permaShow("autoW")
+		settings.combo:permaShow("autoWKeyPress")
 	
 	settings:addSubMenu("[" .. myHero.charName.. "] - Ult Helper", "ult")
 		settings.ult:addParam("fireKey", "Fire ult on Target", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
