@@ -1,4 +1,4 @@
-local version = "1.06"
+local version = "1.07"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Rengar.lua".."?rand="..math.random(1,10000)
@@ -119,6 +119,9 @@ MyTrueRange = myHero.range + GetDistance(myHero.minBBox)
 lastECheck = 0
 hasQ = false
 
+comboSpell = "Smart"
+comboLastUpdated = 0
+
 spells = {}
 spells.q = {name = myHero:GetSpellData(_Q).name, ready = false}
 spells.w = {name = myHero:GetSpellData(_W).name, ready = false, range = 450} -- Range decreased so that it hits running enemies
@@ -215,6 +218,30 @@ function arrangePriority()
     end
 end
 
+function emp()
+	if settings.emp.use then
+		if IsKeyDown(string.byte("A")) then
+			settings.emp.q = true
+			settings.emp.e = false
+			comboSpell = "Q"
+			
+			comboLastUpdated = os.clock()
+		end
+		
+		if IsKeyDown(string.byte("S")) then
+			settings.emp.e = true
+			settings.emp.q = false
+			comboSpell = "E"
+			
+			comboLastUpdated  = os.clock()
+		end
+	else
+		settings.emp.q = false
+		settings.emp.e = false
+		comboSpell = "Smart"
+	end
+end
+
 ----------------------
 --      Hooks       --
 ----------------------
@@ -260,10 +287,17 @@ function OnRemoveBuff(unit, buff)
 	end
 end
 
-function OnProcessSpell(object, spellProc)
-	local unit = object
-	local spell = spellProc
-	
+function OnProcessSpell(unit, spell)	
+	if unit == myHero and myHero.mana == 5 then
+		if settings.emp.smart then
+			if spell.name == "RengarQ" and comboSpell == "Q" then
+				comboSpell = "Smart"
+			elseif spell.name == "RengarE" and comboSpell == "E" then
+				comboSpell = "Smart"
+			end
+		end
+	end
+
 	if unit.type == myHero.type and unit.team ~= myHero.team and isAGapcloserUnit[unit.charName] and GetDistance(unit) < 2000 and spell ~= nil then			
 		if spell.name == (type(isAGapcloserUnit[unit.charName].spell) == 'number' and unit:GetSpellData(isAGapcloserUnit[unit.charName].spell).name or isAGapcloserUnit[unit.charName].spell) and settings.gapClose[unit.charName] then
 			if spell.target ~= nil and spell.target.name == myHero.name or isAGapcloserUnit[unit.charName].spell == 'blindmonkqtwo' and myHero.mana == 5 then
@@ -277,6 +311,7 @@ end
 function OnTick()
 	readyCheck()
 	Target = getTarg()
+	emp()
 	
 	MyTrueRange = myHero.range + GetDistance(myHero.minBBox) + 50
 		
@@ -296,6 +331,12 @@ function OnTick()
 		myHero:Attack(Target)
 	end
 	
+	if os.clock() - comboLastUpdated > settings.emp.smartReset and settings.emp.smartReset > 0 then
+		comboSpell = "Smart"
+		settings.emp.q = false
+		settings.emp.e = false
+	end
+	
 	if settings.combo.comboKey and settings.combo.items and ValidTarget(Target) and GetDistance(Target) < MyTrueRange and MyTrueRange < 500 then
 		for slot = ITEM_1, ITEM_7 do
 			if items[myHero:GetSpellData(slot).name] then
@@ -308,13 +349,17 @@ function OnTick()
 		end
 	end
 	
+	if comboSpell == "Smart" then
+		AutoHeal()
+	end
+	
 	if settings.combo.comboKey and ValidTarget(Target) then	
 		if GetDistance(Target) < settings.combo.eMaxRange then
 			if myHero.mana < 5 then
 				if MyTrueRange < 700 then
 					CastE(Target)
 				end
-			elseif myHero.mana == 5 and settings.combo.empE then
+			elseif myHero.mana == 5 and settings.combo.empE and (comboSpell == "Smart" or comboSpell == "E") then
 				if MyTrueRange < 700 and GetDistance(Target) > settings.combo.empERange then
 					CastE(Target)
 				end
@@ -325,10 +370,12 @@ function OnTick()
 			CastW(Target)
 		end
 		
-		CastQ(Target)
+		if (comboSpell == "Smart" or comboSpell == "Q") and myHero.mana == 5 then
+			CastQ(Target)
+		elseif myHero.mana < 5 then
+			CastQ(Target)
+		end
 	end
-
-	AutoHeal()
 end
 
 -- Drawing hook
@@ -336,6 +383,11 @@ function OnDraw()
 	if myHero.dead then return end
 	
 	Target = getTarg()
+			
+	if settings.draw.combo then
+		UpdateWindow()
+		DrawText3D("Next Emp: " .. comboSpell, myHero.x-100, myHero.y-100, myHero.z, settings.draw.comboSize, 0xFFFFFF00)
+	end
 	
 	if settings.draw.target and Target ~= nil then
 		DrawCircle(Target.x, Target.y, Target.z, 150, 0xffffff00)
@@ -369,12 +421,23 @@ function Menu()
 		settings.combo:addParam("empERange", "Use if enemy is further than", SCRIPT_PARAM_SLICE, 500,0,1000,0)
 		settings.combo:addParam("eMaxRange", "Maximum range to use E", SCRIPT_PARAM_SLICE, 950,0,1000,0)
 		settings.combo:permaShow("comboKey")
+		
+	settings:addSubMenu("[" .. myHero.charName.. "] - Empowered Spell Combo Manager", "emp")
+		settings.emp:addParam("use", "Use Combo Manager", SCRIPT_PARAM_ONOFF, true)
+		settings.emp:addParam("smart", "Switch back to Smart after using spell", SCRIPT_PARAM_ONOFF, true)
+		settings.emp:addParam("smartReset", "Reset spell after seconds (0=never)  ", SCRIPT_PARAM_SLICE, 10,0,60,0)
+		settings.emp:addParam("q", "Press A - Cast Q next", 0, 0)
+		settings.emp:addParam("e", "Press S - Cast E next", 0, 0)
 	
 	settings:addSubMenu("[" .. myHero.charName.. "] - Auto Heal", "heal")
 		settings.heal:addParam("heal", "Use Auto Heal", SCRIPT_PARAM_ONOFF, true)
 		settings.heal:addParam("maxHP", "Auto Heal if below %", SCRIPT_PARAM_SLICE, 25,0,100,0)
 	
 	settings:addSubMenu("[" .. myHero.charName.. "] - Drawing", "draw")
+		settings.draw:addParam("combo", "Draw Combo Manager Spell", SCRIPT_PARAM_ONOFF, true)
+		settings.draw:addParam("comboSize", "Combo Manager text size", SCRIPT_PARAM_SLICE, 25,0,100,0)
+		settings.draw:addParam("comboHeight", "Combo Manager vertical position", SCRIPT_PARAM_SLICE, 80,0,100,0)
+		settings.draw:addParam("comboWidth", "Combo Manager horizontal position", SCRIPT_PARAM_SLICE, 47,0,100,0)
 		settings.draw:addParam("e", "Draw e", SCRIPT_PARAM_ONOFF, true)
 		settings.draw:addParam("empERange", "Draw Empowered E min range", SCRIPT_PARAM_ONOFF, true)
 		settings.draw:addParam("range", "Draw my range", SCRIPT_PARAM_ONOFF, true)
