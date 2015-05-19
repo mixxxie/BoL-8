@@ -1,4 +1,4 @@
-local version = "1.07"
+local version = "1.08"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Rengar.lua".."?rand="..math.random(1,10000)
@@ -248,15 +248,6 @@ end
 
 -- Init hook
 function OnLoad()
-		if _G.Reborn_Initialised then
-        orbwalkCheck()
-    elseif _G.Reborn_Loaded then
-        DelayAction(OnLoad, 1)
-        return
-    else
-        orbwalkCheck()
-    end
-	
 	print("<font color='#009DFF'>[Rengar]</font><font color='#FFFFFF'> has loaded!</font> <font color='#2BFF00'>[v"..version.."]</font>")
 
 	if autoupdate then
@@ -272,6 +263,16 @@ function OnLoad()
 	end
 	
 	Menu()
+	
+	if _G.Reborn_Initialised then
+        orbwalkCheck()
+    elseif _G.Reborn_Loaded then
+        DelayAction(OnLoad, 1)
+        return
+    else
+        orbwalkCheck()
+    end
+	
 	arrangePriority()
 end
 
@@ -436,8 +437,6 @@ function Menu()
 	settings:addSubMenu("[" .. myHero.charName.. "] - Drawing", "draw")
 		settings.draw:addParam("combo", "Draw Combo Manager Spell", SCRIPT_PARAM_ONOFF, true)
 		settings.draw:addParam("comboSize", "Combo Manager text size", SCRIPT_PARAM_SLICE, 25,0,100,0)
-		settings.draw:addParam("comboHeight", "Combo Manager vertical position", SCRIPT_PARAM_SLICE, 80,0,100,0)
-		settings.draw:addParam("comboWidth", "Combo Manager horizontal position", SCRIPT_PARAM_SLICE, 47,0,100,0)
 		settings.draw:addParam("e", "Draw e", SCRIPT_PARAM_ONOFF, true)
 		settings.draw:addParam("empERange", "Draw Empowered E min range", SCRIPT_PARAM_ONOFF, true)
 		settings.draw:addParam("range", "Draw my range", SCRIPT_PARAM_ONOFF, true)

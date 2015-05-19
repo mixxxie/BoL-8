@@ -1,4 +1,4 @@
-local version = "1.16"
+local version = "1.18"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Soraka.lua".."?rand="..math.random(1,10000)
@@ -256,15 +256,6 @@ end
 
 -- Init hook
 function OnLoad()
-	if _G.Reborn_Initialised then
-        orbwalkCheck()
-    elseif _G.Reborn_Loaded then
-        DelayAction(OnLoad, 1)
-        return
-    else
-        orbwalkCheck()
-    end
-
 	print("<font color='#009DFF'>[Soraka]</font><font color='#FFFFFF'> has loaded!</font> <font color='#2BFF00'>[v"..version.."]</font>")
 
 	if autoupdate then
@@ -278,6 +269,15 @@ function OnLoad()
 
 	Menu()
 
+	if _G.Reborn_Initialised then
+        orbwalkCheck()
+    elseif _G.Reborn_Loaded then
+        DelayAction(OnLoad, 1)
+        return
+    else
+        orbwalkCheck()
+    end
+	
 	if hpload then
 		HPred:AddSpell("Q", 'Soraka', {type = "DelayCircle", delay = 0.25, range = 1050, radius = 250, speed=1300})
 		HPred:AddSpell("E", 'Soraka', {type = "PromptCircle", delay = 0.25, range = 925, radius = 250})

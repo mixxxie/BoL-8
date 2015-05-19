@@ -1,4 +1,4 @@
-local version = "1.16"
+local version = "1.18"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Ashe.lua".."?rand="..math.random(1,10000)
@@ -166,15 +166,6 @@ end
 
 -- Init hook
 function OnLoad()
-	if _G.Reborn_Initialised then
-        orbwalkCheck()
-    elseif _G.Reborn_Loaded then
-        DelayAction(OnLoad, 1)
-        return
-    else
-        orbwalkCheck()
-    end
-
 	print("<font color='#009DFF'>[Ashe]</font><font color='#FFFFFF'> has loaded!</font> <font color='#2BFF00'>[v"..version.."]</font>")
 
 	if autoupdate then
@@ -191,6 +182,16 @@ function OnLoad()
 	end
 	
 	Menu()
+	
+	if _G.Reborn_Initialised then
+        orbwalkCheck()
+    elseif _G.Reborn_Loaded then
+        DelayAction(OnLoad, 1)
+        return
+    else
+        orbwalkCheck()
+    end
+	
 	AddUpdateBuffCallback(CustomUpdateBuff)	
 end
 
