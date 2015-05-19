@@ -1,4 +1,4 @@
-local version = "1.14"
+local version = "1.15"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Ashe.lua".."?rand="..math.random(1,10000)
@@ -224,7 +224,7 @@ function OnTick()
 		end
 	end
 	
-	if settings.w.autoW and ValidTarget(Target) and not isRecall(myHero) then
+	if (settings.w.autoW or settings.w.autoWKEyPress) and ValidTarget(Target) and not isRecall(myHero) then
 		if getManaPercent() > settings.w.autoWmana then
 			if (settings.combo.dontW and wKSSoon()) == false then
 				CastW(Target)
@@ -334,7 +334,8 @@ function Menu()
 		settings.combo:permaShow("q")
 		
 	settings:addSubMenu("[" .. myHero.charName.. "] - Auto W", "w")
-		settings.w:addParam("autoW", "Auto W", SCRIPT_PARAM_ONOFF, true)
+		settings.w:addParam("autoW", "Auto W Toggle", SCRIPT_PARAM_ONKEYTOGGLE, true, string.byte("G"))
+		settings.w:addParam("autoWKeyPress", "Auto W Key Press", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
 		settings.w:addParam("autoWmana", "Minimum Mana", SCRIPT_PARAM_SLICE, 40, 0, 100, 0)
 	
 	settings:addSubMenu("[" .. myHero.charName.. "] - Ult Helper", "ult")
