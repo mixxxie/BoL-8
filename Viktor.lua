@@ -1,4 +1,4 @@
-local version = "1.01"
+local version = "1.02"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Viktor.lua".."?rand="..math.random(1,10000)
@@ -264,7 +264,7 @@ function OnTick()
 		end
 		
 		if settings.combo.e then
-			CastE(Target)
+			CastE1(Target)
 		end
 	end
 	
@@ -275,7 +275,7 @@ function OnTick()
 			end
 			
 			if settings.harass.e then
-				CastE(Target)
+				CastE1(Target)
 			end
 		end
 	end
@@ -496,147 +496,11 @@ function CastE1(firstTarget)
 				local hitPosX = (540 * EndPosition.x + (dist2 - 540) * myHero.x)/dist2
 				local hitPosZ = (540 * EndPosition.z + (dist2 - 540) * myHero.z)/dist2
 				
-				Packet("S_CAST", {spellId = _E, toX = math.floor(hitPosX), toY = math.floor(hitPosZ), fromX = math.floor(hitPosX), fromY = math.floor(hitPosZ)}):send()
+				CastSpell(_E, hitPosX, hitPosZ)
 			else	
-				Packet("S_CAST", {spellId = _E, toX = EndPosition.x, toY = EndPosition.z, fromX = EndPosition.x, fromY = EndPosition.z}):send()
+				CastSpell(_E, EndPosition)
 			end
 		end
-	end
-end
-
-function CastE2(startTarget, endTarget)
-	if spells.e.ready then
-		EndPosition = getEndPosition(startTarget, endTarget)
-		
-		if EndPosition ~= nil then
-			Packet("S_CAST", {spellId = _E, toX = EndPosition.x, toY = EndPosition.z, fromX = startTarget.x, fromY = startTarget.z}):send()
-		end
-	end
-end
-
-function CastE(Target)
-	local enemyCount = 0
-
-	for i, enemy in ipairs(GetEnemyHeroes()) do
-		local distance = 1250
-		local closeEnemy = nil
-		
-		for j, enemyUsed in ipairs(GetEnemyHeroes()) do
-			if ValidTarget(enemyUsed) and GetDistance(enemyUsed) < 1225 and GetDistance(enemyUsed) < distance then
-				local canAdd = true
-		
-				for k = 1, enemyCount do
-					if enemyUsed == orderedEnemies[k - 1].enemy then
-						canAdd = false
-					end
-				end
-				
-				if canAdd == true then
-					closeEnemy = enemyUsed
-				end
-			end
-		end
-		
-		if closeEnemy ~= nil and ValidTarget(closeEnemy) then
-			orderedEnemies[enemyCount] = {enemy = closeEnemy}
-			enemyCount = enemyCount + 1
-		end
-	end
-	
-	if enemyCount == 1 then
-		CastE1(orderedEnemies[0].enemy)
-	else
-		for i = 1, enemyCount do 
-			if ValidTarget(Target) and ValidTarget(orderedEnemies[i - 1].enemy) and GetDistance(orderedEnemies[i - 1].enemy) < 525 and GetDistance(orderedEnemies[i - 1].enemy, Target) < 700 and orderedEnemies[i - 1].enemy ~= Target then
-				CastE2(orderedEnemies[i - 1].enemy, Target)
-			end
-		end
-		
-		for i = 1, enemyCount do 
-			if ValidTarget(Target) and ValidTarget(orderedEnemies[i - 1].enemy) and GetDistance(orderedEnemies[i - 1].enemy, Target) < 700 and orderedEnemies[i - 1].enemy ~= Target then
-				Ax = orderedEnemies[i - 1].enemy.x
-				Ay = orderedEnemies[i - 1].enemy.z
-				
-				Bx = Target.x
-				By = Target.z
-				
-				Cx = myHero.x
-				Cy = myHero.z
-				
-				R = 425
-				
-				--compute the euclidean distance between A and B
-				LAB = math.sqrt( (Bx-Ax) ^ 2 +(By-Ay) ^ 2  )
-
-				--compute the direction vector D from A to B
-				Dx = (Bx-Ax)/LAB
-				Dy = (By-Ay)/LAB
-
-				--Now the line equation is x = Dx*t + Ax, y = Dy*t + Ay with 0 <= t <= 1.
-
-				--compute the value t of the closest point to the circle center (Cx, Cy)
-				t = Dx*(Cx-Ax) + Dy*(Cy-Ay)    
-
-				--This is the projection of C on the line from A to B.
-				--compute the coordinates of the point E on line and closest to C
-				Ex = t*Dx+Ax
-				Ey = t*Dy+Ay
-
-				-- compute the euclidean distance from E to C
-				LEC = math.sqrt( (Ex-Cx) ^ 2 +(Ey-Cy) ^ 2  )
-
-									
-				target1 = nil
-				target2 = nil
-				
-				usePosition = nil
-				
-				-- test if the line intersects the circle
-				if LEC < R then
-					-- compute distance from t to circle intersection point
-					dt = math.sqrt( R ^ 2  - LEC ^ 2 )
-
-					-- compute first intersection point
-					Fx = (t-dt)*Dx + Ax
-					Fy = (t-dt)*Dy + Ay
-
-					-- compute second intersection point
-					Gx = (t+dt)*Dx + Ax
-					Gy = (t+dt)*Dy + Ay
-					
-					if GetDistance(orderedEnemies[i - 1].enemy) < GetDistance(Target) then
-						target1 = orderedEnemies[i - 1].enemy
-						target2 = Target
-					else
-						target1 = Target
-						target2 = orderedEnemies[i - 1].enemy
-					end
-					
-					if ((target2.x - Fx) ^ 2 + (target2.z - Fy) ^ 2) < ((target2.x - Gx) ^ 2 + (target2.z - Gy) ^ 2) then
-						usePosition = Vector(math.floor(Fx),0,math.floor(Fy))
-					else
-						usePosition = Vector(math.floor(Gx),0,math.floor(Gy))
-					end
-					
-					CastE2(usePosition, target2)
-				elseif LEC == R then
-					if GetDistance(orderedEnemies[i - 1].enemy) < GetDistance(Target) then
-						target1 = orderedEnemies[i - 1].enemy
-						target2 = Target
-					else
-						target1 = Target
-						target2 = orderedEnemies[i - 1].enemy
-					end
-					
-					usePosition = Vector(math.floor(Ex),0,math.floor(Ey))
-					CastE2(usePosition, target2)
-				end
-			end
-		end
-	end
-	
-	if ValidTarget(Target) then
-		CastE1(Target)
 	end
 end
 
@@ -653,7 +517,7 @@ function getEndPosition(from, to)
 end
 
 function CastR(unit)
-	if ValidTarget(unit) and GetDistance(unit) <= spells.r.range + 100 then
+	if ValidTarget(unit) and GetDistance(unit) <= spells.r.range then
 		CastSpell(_R, unit)
 	end
 end
