@@ -1,4 +1,4 @@
-local version = "1.01"
+local version = "1.02"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Lissandra.lua".."?rand="..math.random(1,10000)
@@ -73,7 +73,7 @@ eTime = 0
 MyTrueRange = (550 + GetDistance(myHero.minBBox))
 
 spells = {}
-spells.q = {name = myHero:GetSpellData(_Q).name, ready = false, range = 725,  width = 100, speed = 2250, delay = 0.25, rangeMax = 975}
+spells.q = {name = myHero:GetSpellData(_Q).name, ready = false, range = 725,  width = 100, speed = 2250, delay = 0.25, rangeMax = 925}
 spells.w = {name = myHero:GetSpellData(_W).name, ready = false, range = 450 - 25} --So that we have a bit of extra space
 spells.e = {name = myHero:GetSpellData(_E).name, ready = false, range = 1050,  width = 110, speed = 850, delay = 0.25}
 spells.r = {name = myHero:GetSpellData(_R).name, ready = false, range = 550}
@@ -356,7 +356,7 @@ function OnProcessSpell(object, spellProc)
 		if spell ~= nil then
 			if settings.interrupt[spellProc.name] then
 				if GetDistance(object) < settings.interrupt.interruptRange and spells.r.ready and settings.interrupt.r then
-					CastSpell(_R, object.x, object.z)
+					CastSpell(_R, object)
 				end
 			end
 		end
@@ -666,8 +666,10 @@ function CastE2(unit)
 		end
 	end
 	
+	if eClaw ~= nil and eStart ~= nil and eEnd ~= nil then
 	if math.sqrt((eClaw.x - eEnd.x) ^ 2 + (eClaw.z - eEnd.z) ^ 2) < 50 then
 		CastSpell(_E)
+	end
 	end
 end
 
