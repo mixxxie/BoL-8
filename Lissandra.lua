@@ -1,4 +1,4 @@
-local version = "1.0"
+local version = "1.01"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Lissandra.lua".."?rand="..math.random(1,10000)
@@ -463,7 +463,7 @@ function Menu()
 		settings.ks:addParam("e", "KS with E", SCRIPT_PARAM_ONOFF, true)
 		settings.ks:addParam("r", "KS with R", SCRIPT_PARAM_ONOFF, true)
 
-	settings:addSubMenu("["..myHero.charName.."] - (R) Settings", "r")	
+	settings:addSubMenu("["..myHero.charName.."] - (R) Settings (in combo)", "r")	
 		if Champ[1] ~= nil then settings.r:addParam("champ1", "Use on "..Champ[1], SCRIPT_PARAM_ONOFF, true) end
 		if Champ[2] ~= nil then settings.r:addParam("champ2", "Use on "..Champ[2], SCRIPT_PARAM_ONOFF, true) end
 		if Champ[3] ~= nil then settings.r:addParam("champ3", "Use on "..Champ[3], SCRIPT_PARAM_ONOFF, true) end
@@ -664,10 +664,10 @@ function CastE2(unit)
 		if math.sqrt((eClaw.x - x) ^ 2 + (eClaw.z - z) ^ 2) < 50 then
 			CastSpell(_E)
 		end
-	elseif unit == nil and eClaw ~= nil and eStart ~= nil and eEnd ~= nil then
-		if math.sqrt((eClaw.x - eEnd.x) ^ 2 + (eClaw.z - eEnd.z) ^ 2) < 50 then
-			CastSpell(_E)
-		end
+	end
+	
+	if math.sqrt((eClaw.x - eEnd.x) ^ 2 + (eClaw.z - eEnd.z) ^ 2) < 50 then
+		CastSpell(_E)
 	end
 end
 
