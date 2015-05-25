@@ -1,4 +1,4 @@
-local version = "1.02"
+local version = "1.03"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Lissandra.lua".."?rand="..math.random(1,10000)
@@ -308,6 +308,10 @@ function OnTick()
 		
 		if settings.combo.q then
 			CastQ(Target)
+			
+			for i, enemy in pairs(GetEnemyHeroes()) do
+				CastQ(enemy)
+			end
 		end
 	end
 		
@@ -557,9 +561,11 @@ function CastQ(unit)
 			end
 			
 			if collision == true and GetDistance(unit) < spells.q.rangeMax then
-				local castX = myHero.x + spells.q.range * ((unit.x - myHero.x) / GetDistance(unit))
-				local castZ = myHero.z + spells.q.range * ((unit.z - myHero.z) / GetDistance(unit))
-
+				Position = pred:GetPredictedPos(unit, spells.q.delay + (GetDistance(unit) / spells.q.speed))
+			
+				local castX = myHero.x + spells.q.range * ((Position.x - myHero.x) / GetDistance(Position))
+				local castZ = myHero.z + spells.q.range * ((Position.z - myHero.z) / GetDistance(Position))
+				
 				CastSpell(_Q, castX, castZ)
 			end
 		end
@@ -711,7 +717,7 @@ function Clear()
         EnemyMinions:update()
         for i, minion in pairs(EnemyMinions.objects) do
             if ValidTarget(minion, spells.q.rangeMax) and os.clock() - LastFarmRequest > 0.2 then 
-                if settings.clear.useE > 0 and spells.e.ready and eClaw == nil then
+                if settings.clear.useE > 0 and spells.e.ready and eStart == nil then
                     local BestPos, Count = GetBestLineFarmPosition(spells.e.range, spells.e.width, EnemyMinions.objects)
                     if BestPos ~= nil and Count >= settings.clear.useE then CastSpell(_E, Normalize(BestPos, myHero, spells.e.range).x, Normalize(BestPos, myHero, spells.e.range).z) end
                 end
