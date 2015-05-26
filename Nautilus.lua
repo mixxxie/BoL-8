@@ -1,4 +1,4 @@
-local version = "1.02"
+local version = "1.03"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Nautilus.lua".."?rand="..math.random(1,10000)
@@ -47,14 +47,15 @@ function OnLoad()
         CheckVPred()
        
         if FileExist(LIB_PATH .. "/VPrediction.lua") and FileExist(LIB_PATH .. "/SxOrbWalk.lua") then
-                DelayAction(function() 
-                        CustomOnLoad()
-                        AddMsgCallback(CustomOnWndMsg)
-                        AddDrawCallback(CustomOnDraw)          
-                        AddProcessSpellCallback(CustomOnProcessSpell)
-                        AddTickCallback(CustomOnTick)
-                        AddApplyBuffCallback(CustomApplyBuff)          
-                end, 6)
+			DelayAction(function() 
+				CustomOnLoad()
+				AddMsgCallback(CustomOnWndMsg)
+				AddDrawCallback(CustomOnDraw)          
+				AddProcessSpellCallback(CustomOnProcessSpell)
+				AddTickCallback(CustomOnTick)
+				AddUpdateBuffCallback(CustomUpdateBuff)	
+				AddRemoveBuffCallback(CustomRemoveBuff) 					
+			end, 6)
         end
 end
  
@@ -95,20 +96,22 @@ function CustomOnLoad()
 end
  
 function CustomOnTick()
-        TargetSelector:update()
-        Target = GetCustomTarget()
-        if SAC then
-                if _G.AutoCarry.Keys.AutoCarry then
-                        _G.AutoCarry.Orbwalker:Orbwalk(Target)
-                end
-        end
-        ComboKey = Settings.combo.comboKey
-        Checks()
-        if Target ~= nil then
-                if ComboKey then
-                        Combo(Target)
-                end
-        end
+	TargetSelector:update()
+	Target = GetCustomTarget()
+	if SAC then
+			if _G.AutoCarry.Keys.AutoCarry then
+					_G.AutoCarry.Orbwalker:Orbwalk(Target)
+			end
+	end
+	ComboKey = Settings.combo.comboKey
+	Checks()
+	if Target ~= nil then
+			if ComboKey then
+					Combo(Target)
+			end
+	end
+	
+	applyPassive()
 end
  
 function CustomOnDraw()
@@ -121,7 +124,7 @@ function CustomOnDraw()
                 end
                
                 if Settings.drawing.myHero then
-                        DrawCircle(myHero.x, myHero.y, myHero.z, myHero.range, RGB(Settings.drawing.myColor[2], Settings.drawing.myColor[3], Settings.drawing.myColor[4]))
+                        DrawCircle(myHero.x, myHero.y, myHero.z, MyTrueRange, RGB(Settings.drawing.myColor[2], Settings.drawing.myColor[3], Settings.drawing.myColor[4]))
                 end
         end
 end
@@ -183,6 +186,14 @@ function CastW(unit)
         if SkillW.ready and GetDistance(unit) <= SkillW.range then
                 CastSpell(_W)
         end    
+end
+
+function applyPassive()
+	for i, enemy in pairs(myEnemyTable) do
+		if ValidTarget(enemy) and GetDistance(enemy) < MyTrueRange and passiveBuff[enemy.name] == false then
+			myHero:Attack(enemy)
+		end
+    end
 end
  
 function Checks()
@@ -252,10 +263,15 @@ function Variables()
         SkillW = { name = "Titan's Wrath", range = 600, delay = nil, speed = math.huge, width = nil, ready = false }
         SkillE = { name = "Riptide", range = 500, delay = 0.5, speed = math.huge, width = nil, ready = false }
         SkillR = { name = "Depth Charge", range = 850, delay = 0.5, speed = math.huge, width = nil, ready = false }
-        myEnemyTable = GetEnemyHeroes()
-        Champ = { }
+       
+	    myEnemyTable = GetEnemyHeroes()
+        Champ = {}
+		passiveBuff = {}
+		MyTrueRange = myHero.range + GetDistance(myHero.minBBox)
+		
         for i, enemy in pairs(myEnemyTable) do
                 Champ[i] = enemy.charName
+				passiveBuff[enemy.name] = false
         end
        
         local ts
@@ -275,6 +291,22 @@ function OnProcessSpell(object, spellProc)
 					CastSpell(_R, object.x, object.z)	
 				end
 			end
+		end
+	end
+end
+
+function CustomUpdateBuff(unit, buff)
+	if unit and buff then
+		if buff.name == "nautiluspassiveroot" and unit.type == myHero.type then
+			passiveBuff[unit.name] = true
+		end
+	end
+end
+
+function CustomRemoveBuff(unit, buff)
+	if unit and buff then
+		if buff.name == "nautiluspassivecheck" and unit.type == myHero.type then
+			passiveBuff[unit.name] = false
 		end
 	end
 end
