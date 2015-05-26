@@ -1,4 +1,4 @@
-local version = "1.03"
+local version = "1.04"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Nautilus.lua".."?rand="..math.random(1,10000)
@@ -108,10 +108,9 @@ function CustomOnTick()
 	if Target ~= nil then
 			if ComboKey then
 					Combo(Target)
+					applyPassive()
 			end
 	end
-	
-	applyPassive()
 end
  
 function CustomOnDraw()
