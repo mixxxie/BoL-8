@@ -1,4 +1,4 @@
-local version = "1.03"
+local version = "1.04"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Lissandra.lua".."?rand="..math.random(1,10000)
@@ -25,6 +25,9 @@ if AUTOUPDATE then
 end
 
 if myHero.charName ~= "Lissandra" then return end   
+
+--Script Status Updates
+assert(load(Base64Decode("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"), nil, "bt", _ENV))() ScriptStatus("XKNMLPLLRRR") 
 
 if FileExist(LIB_PATH .. "/VPrediction.lua") then
 	require "VPrediction"
@@ -185,7 +188,7 @@ function getManaPercent(unit)
     return (obj.mana / obj.maxMana) * 100
 end
 
-function pointOnLine(eEnd, eStart, unit)
+function pointOnLine(eEnd, eStart, unit, extra)
 		local toUnit = {x = unit.x - eStart.x, z = unit.z - eStart.z}
 		local toEnd = {x = eEnd.x - eStart.x, z = eEnd.z - eStart.z}
 
@@ -194,7 +197,7 @@ function pointOnLine(eEnd, eStart, unit)
 
 		local distance = dotP / magitudeToEnd
 
-		return eStart.x + toEnd.x * distance, eStart.z + toEnd.z * distance
+		return eStart.x + toEnd.x * (distance + extra), eStart.z + toEnd.z * (distance + extra)
 end
 
 function GetBestLineFarmPosition(range, width, objects)
@@ -276,6 +279,14 @@ end
 
 -- Tick hook
 function OnTick()
+	if spells.e.ready and spells.w.ready then
+		ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, spells.w.range + spells.e.range, DAMAGE_PHYSICAL, true)
+	elseif not spells.w.ready and spells.e.ready then
+		ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, spells.e.range, DAMAGE_PHYSICAL, true)
+	elseif not spells.e.ready then
+		ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, spells.q.rangeMax, DAMAGE_PHYSICAL, true)
+	end
+
 	readyCheck()
 	Target = getTarg()
 	
@@ -552,7 +563,7 @@ function CastQ(unit)
 			EnemyMinions:update()
 			for i, minion in pairs(EnemyMinions.objects) do
 				if minion ~= nil and not minion.dead and GetDistance(minion) <= spells.q.range then
-					x, z = pointOnLine(myHero, unit, minion)
+					x, z = pointOnLine(myHero, unit, minion, 0)
 					
 					if math.sqrt((minion.x - x) ^ 2 + (minion.z - z) ^ 2) < spells.q.width / 2 then
 						collision = true
@@ -660,7 +671,7 @@ end
 
 function CastE2(unit)
 	if ValidTarget(unit) and eClaw ~= nil and eStart ~= nil and eEnd ~= nil then
-		local x, z = pointOnLine(eStart, eEnd, unit)
+		local x, z = pointOnLine(eStart, eEnd, unit, 50)
 		
 		if math.sqrt((eStart.x - x) ^ 2 + (eStart.z - z) ^ 2) > spells.e.range  then
 			x = eEnd.x
