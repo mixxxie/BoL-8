@@ -1,4 +1,4 @@
-local version = "1.20"
+local version = "1.21"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Thresh.lua".."?rand="..math.random(1,10000)
@@ -45,6 +45,7 @@ end
 informationTable = {}
 loaded = false
 pred = nil
+qLast = 0
 
 spells = {}
 spells.q = {name = myHero:GetSpellData(_Q).name, ready = false, range = 1100, width = 100}
@@ -154,7 +155,8 @@ function CastQ(unit)
 				if  spells.q.ready and chance >= 2 then
 					CastSpell(_Q, castPos.x, castPos.z)
 				end
-			elseif settings.pred == 2 and VIP_USER then
+			elseif settings.pred == 2 and VIP_USER and os.clock() - qLast > 0.2 then
+				qLast = os.clock()
 				local targ = DPTarget(unit)
 				local state,hitPos,perc = dp:predict(targ, qpred)
 				if spells.q.ready and state == SkillShot.STATUS.SUCCESS_HIT then
@@ -184,7 +186,7 @@ function CastWEngage(Target)
             local ally = heroManager:getHero(i)
 			
             if ally.team == myHero.team and ally.name ~= myHero.name and not ally.dead then		
-				if GetDistance(Target, ally) >= 600 and GetDistance(ally) <= spells.w.range then 
+				if GetDistance(Target, ally) >= 700 and GetDistance(ally) <= spells.w.range then 
 					if ValidTarget(bestAlly) then
 						if GetDistance(ally) >= GetDistance(bestAlly) then
 							bestAlly = ally
@@ -303,7 +305,7 @@ end
 
 function CastEGap()
 	if spells.e.ready and informationTable.spellCastedTick ~= nil then
-		if not spellExpired and (GetTickCount() - informationTable.spellCastedTick) <= (informationTable.spellRange/informationTable.spellSpeed)*1000 then
+		if not spellExpired and (GetTickCount() - informationTable.spellCastedTick) <= (informationTable.spellRange / informationTable.spellSpeed) * 1000 then
 			local spellDirection     = (informationTable.spellEndPos - informationTable.spellStartPos):normalized()
 			local spellStartPosition = informationTable.spellStartPos + spellDirection
 			local spellEndPosition   = informationTable.spellStartPos + spellDirection * informationTable.spellRange
@@ -311,7 +313,7 @@ function CastEGap()
 
 			local lineSegment = LineSegment(Point(spellStartPosition.x, spellStartPosition.y), Point(spellEndPosition.x, spellEndPosition.y))
 
-			if lineSegment:distance(heroPosition) <= (not informationTable.spellIsAnExpetion and 65 or 200) then
+			if lineSegment:distance(heroPosition) < spells.e.range then
 				CastEPush(informationTable.spellSource)
 			end
 		else
