@@ -247,7 +247,7 @@ function OnLoad()
 		AUConfig = scriptConfig("(AS) Auto Ultimate", "AutoUlt")
 		for i=1, heroManager.iCount do
 			local teammate = heroManager:GetHero(i)
-			if teammate.team == myHero.team then AUConfig:addParam("teammateult"..i, "Ult "..teammate.charName, SCRIPT_PARAM_ONOFF, false) end
+			if teammate.team == myHero.team then AUConfig:addParam("teammateult"..i, "Ult "..teammate.charName, SCRIPT_PARAM_ONOFF, true) end
 		end
 		AUConfig:addParam("maxhppercent", "Max percent of hp", SCRIPT_PARAM_SLICE, 100, 0, 100, 0)	
 		AUConfig:addParam("mindmgpercent", "Min dmg percent", SCRIPT_PARAM_SLICE, 100, 0, 100, 0)
