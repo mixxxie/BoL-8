@@ -15,7 +15,7 @@
 		- Press shift to configure	
 ]]
 
-local version = "1.01"
+local version = "1.02"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/AutoShield.lua".."?rand="..math.random(1,10000)
@@ -304,7 +304,6 @@ function OnLoad()
 		ASIConfig:addParam("mindmg", "Min dmg approx", SCRIPT_PARAM_INFO, 0)
 		ASIConfig:addParam("skillshots", "Shield Skillshots", SCRIPT_PARAM_ONOFF, true)
 	end
-	PrintChat(" >> Auto Shield 1.10 loaded!")
 end
 
 function OnProcessSpell(object,spell)
