@@ -1,4 +1,4 @@
-local version = "1.02"
+local version = "1.03"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Viktor.lua".."?rand="..math.random(1,10000)
@@ -250,7 +250,7 @@ function OnTick()
 	Target = getTarg()
 	ATTS = (ATTS + GetLatency() / 2) / 2
 	
-	if settings.combo.comboKey then
+	if settings.combo.comboKey and ValidTarget(Target) then
 		if settings.combo.w then
 			CastW(Target)
 		end
