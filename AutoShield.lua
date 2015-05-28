@@ -15,7 +15,7 @@
 		- Press shift to configure	
 ]]
 
-local version = "1.02"
+local version = "1.03"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/AutoShield.lua".."?rand="..math.random(1,10000)
@@ -545,9 +545,6 @@ function shieldCheck(object,spell,target,typeused)
 				skilldamage = (skilldamage+adamage+onhitspelldmg+onhitdmg+muramanadmg)*1.07+onhittdmg+onhitspelltdmg
 			else
 				if skilldamage > 0 then skilldamage = (skilldamage+onhitspelldmg+muramanadmg)*1.07+onhitspelltdmg end
-			end
-			
-			PrintChat(string.lower(skilldamage) .. " - " .. string.lower(level) )
 			
 		elseif spell.name:lower():find("summonerdot") then
 			skilldamage = getDmg("IGNITE",target,object)
