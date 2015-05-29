@@ -1,4 +1,4 @@
-local version = "1.03"
+local version = "1.04"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Viktor.lua".."?rand="..math.random(1,10000)
@@ -250,7 +250,7 @@ function OnTick()
 	Target = getTarg()
 	ATTS = (ATTS + GetLatency() / 2) / 2
 	
-	if settings.combo.comboKey and ValidTarget(Target) then
+	if settings.combo.comboKey then
 		if settings.combo.w then
 			CastW(Target)
 		end
@@ -445,7 +445,7 @@ end
 --  Cast functions  --
 ----------------------
 function CastQ(unit)
-	if ValidTarget(unit) and GetDistance(unit) <= spells.q.range then
+	if ValidTarget(unit) and GetDistance(unit) <= spells.q.range and spells.q.ready then
 		CastSpell(_Q, unit)
 	end
 end
@@ -454,7 +454,7 @@ function CastW(unit)
 	if ValidTarget(unit) and GetDistance(unit) <= spells.w.range then
 		local targ = DPTarget(unit)
 		local state,hitPos,perc = dp:predict(targ, wpred)
-		if spells.q.ready and state == SkillShot.STATUS.SUCCESS_HIT then
+		if spells.w.ready and state == SkillShot.STATUS.SUCCESS_HIT then
 			CastSpell(_W, hitPos.x, hitPos.z)
 		end
 	
@@ -491,14 +491,14 @@ function CastE1(firstTarget)
 		EndPosition = getEndPosition(Vector(math.floor(xVector),0,math.floor(zVector)), firstTarget)
 		
 		if EndPosition ~= nil then
-			if GetDistance(EndPosition) > 540 then
+			if GetDistance(EndPosition) >= 540 then
 				local dist2 = GetDistance(EndPosition)
 				local hitPosX = (540 * EndPosition.x + (dist2 - 540) * myHero.x)/dist2
 				local hitPosZ = (540 * EndPosition.z + (dist2 - 540) * myHero.z)/dist2
-				
+
 				CastSpell(_E, hitPosX, hitPosZ)
-			else	
-				CastSpell(_E, EndPosition)
+			else
+				CastSpell(_E, EndPosition.x, EndPosition.z)
 			end
 		end
 	end
