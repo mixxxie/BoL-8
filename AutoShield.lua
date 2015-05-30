@@ -15,7 +15,7 @@
 		- Press shift to configure	
 ]]
 
-local version = "1.05"
+local version = "1.04"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/AutoShield.lua".."?rand="..math.random(1,10000)
@@ -335,7 +335,6 @@ function OnProcessSpell(object,spell)
 		shottype,radius,maxdistance = 0,0,0
 		
 		if object.type == "AIHeroClient" then
-			if object.charName == "Ekko" then return end
 			spelltype, casttype = getSpellType(object, spell.name)
 			
 			if casttype == 4 or casttype == 5 or casttype == 6 then return end
@@ -377,92 +376,90 @@ function OnProcessSpell(object,spell)
 				end
 				
 				if hitchampion then
-					if (allytarget.isMe and (_G.Evadeee_Enabled and _G.Evadeee_Loaded and _G.Evadeee_impossibleToEvade) or not _G.Evadeee_Enabled) or not allytarget.isMe then
-						if shieldREADY and ASConfig["teammateshield"..i] and ((typeshield<=4 and Shield) or (typeshield==5 and BShield) or (typeshield==6 and SShield)) then
-							if (((typeshield==1 or typeshield==2 or typeshield==5) and GetDistance(allytarget)<=range) or allytarget.isMe) then
-								local shieldflag, dmgpercent = shieldCheck(object,spell,allytarget,"shields")
-								if shieldflag then
-									if HitFirst and (SLastDistance == nil or GetDistance(allytarget,object) <= SLastDistance) then
-										shieldtarget,SLastDistance = allytarget,GetDistance(allytarget,object)
-									elseif not HitFirst and (SLastDmgPercent == nil or dmgpercent >= SLastDmgPercent) then
-										shieldtarget,SLastDmgPercent = allytarget,dmgpercent
-									end
+					if shieldREADY and ASConfig["teammateshield"..i] and ((typeshield<=4 and Shield) or (typeshield==5 and BShield) or (typeshield==6 and SShield)) then
+						if (((typeshield==1 or typeshield==2 or typeshield==5) and GetDistance(allytarget)<=range) or allytarget.isMe) then
+							local shieldflag, dmgpercent = shieldCheck(object,spell,allytarget,"shields")
+							if shieldflag then
+								if HitFirst and (SLastDistance == nil or GetDistance(allytarget,object) <= SLastDistance) then
+									shieldtarget,SLastDistance = allytarget,GetDistance(allytarget,object)
+								elseif not HitFirst and (SLastDmgPercent == nil or dmgpercent >= SLastDmgPercent) then
+									shieldtarget,SLastDmgPercent = allytarget,dmgpercent
 								end
 							end
 						end
-						
-						if healREADY and AHConfig["teammateheal"..i] and Shield then
-							if ((typeheal==1 or typeheal==2) and GetDistance(allytarget)<=healrange) or allytarget.isMe then
-								local healflag, dmgpercent = shieldCheck(object,spell,allytarget,"heals")
-								if healflag then
-									if HitFirst and (HLastDistance == nil or GetDistance(allytarget,object) <= HLastDistance) then
-										healtarget,HLastDistance = allytarget,GetDistance(allytarget,object)
-									elseif not HitFirst and (HLastDmgPercent == nil or dmgpercent >= HLastDmgPercent) then
-										healtarget,HLastDmgPercent = allytarget,dmgpercent
-									end
-								end		
-							end
+					end
+					
+					if healREADY and AHConfig["teammateheal"..i] and Shield then
+						if ((typeheal==1 or typeheal==2) and GetDistance(allytarget)<=healrange) or allytarget.isMe then
+							local healflag, dmgpercent = shieldCheck(object,spell,allytarget,"heals")
+							if healflag then
+								if HitFirst and (HLastDistance == nil or GetDistance(allytarget,object) <= HLastDistance) then
+									healtarget,HLastDistance = allytarget,GetDistance(allytarget,object)
+								elseif not HitFirst and (HLastDmgPercent == nil or dmgpercent >= HLastDmgPercent) then
+									healtarget,HLastDmgPercent = allytarget,dmgpercent
+								end
+							end		
 						end
-						
-						if ultREADY and AUConfig["teammateult"..i] and Shield then
-							if typeult==2 or (typeult==1 and GetDistance(allytarget)<=ultrange) or (typeult==4 and allytarget.isMe) or (typeult==3 and not allytarget.isMe) then
-								local ultflag, dmgpercent = shieldCheck(object,spell,allytarget,"ult")
-								if ultflag then
-									if HitFirst and (ULastDistance == nil or GetDistance(allytarget,object) <= ULastDistance) then
-										ulttarget,ULastDistance = allytarget,GetDistance(allytarget,object)
-									elseif not HitFirst and (ULastDmgPercent == nil or dmgpercent >= ULastDmgPercent) then
-										ulttarget,ULastDmgPercent = allytarget,dmgpercent
-									end
+					end
+					
+					if ultREADY and AUConfig["teammateult"..i] and Shield then
+						if typeult==2 or (typeult==1 and GetDistance(allytarget)<=ultrange) or (typeult==4 and allytarget.isMe) or (typeult==3 and not allytarget.isMe) then
+							local ultflag, dmgpercent = shieldCheck(object,spell,allytarget,"ult")
+							if ultflag then
+								if HitFirst and (ULastDistance == nil or GetDistance(allytarget,object) <= ULastDistance) then
+									ulttarget,ULastDistance = allytarget,GetDistance(allytarget,object)
+								elseif not HitFirst and (ULastDmgPercent == nil or dmgpercent >= ULastDmgPercent) then
+									ulttarget,ULastDmgPercent = allytarget,dmgpercent
 								end
 							end
 						end
-						
-						if wallREADY and WConfig.wallon and allytarget.isMe and YWall then
-							local wallflag, dmgpercent = shieldCheck(object,spell,allytarget,"wall")
-							if wallflag then
-								CastSpell(wallslot,spell.startPos.x,spell.startPos.z)
+					end
+					
+					if wallREADY and WConfig.wallon and allytarget.isMe and YWall then
+						local wallflag, dmgpercent = shieldCheck(object,spell,allytarget,"wall")
+						if wallflag then
+							CastSpell(wallslot,spell.startPos.x,spell.startPos.z)
+						end
+					end
+					
+					if sbarrierREADY and ASBConfig.barrieron and allytarget.isMe and Shield then
+						local barrierflag, dmgpercent = shieldCheck(object,spell,allytarget,"barrier")
+						if barrierflag then
+							CastSpell(sbarrier)
+						end
+					end
+					
+					if shealREADY and ASHConfig["teammatesheal"..i] and Shield then
+						if GetDistance(allytarget)<=shealrange then
+							local shealflag, dmgpercent = shieldCheck(object,spell,allytarget,"sheals")
+							if shealflag then
+								CastSpell(sheal)
 							end
 						end
-						
-						if sbarrierREADY and ASBConfig.barrieron and allytarget.isMe and Shield then
-							local barrierflag, dmgpercent = shieldCheck(object,spell,allytarget,"barrier")
-							if barrierflag then
-								CastSpell(sbarrier)
+					end
+					
+					if lisREADY and ASIConfig["teammateshieldi"..i] and Shield then
+						if GetDistance(allytarget)<=lisrange then
+							local lisflag, dmgpercent = shieldCheck(object,spell,allytarget,"items")
+							if lisflag then
+								CastSpell(lisslot)
 							end
 						end
-						
-						if shealREADY and ASHConfig["teammatesheal"..i] and Shield then
-							if GetDistance(allytarget)<=shealrange then
-								local shealflag, dmgpercent = shieldCheck(object,spell,allytarget,"sheals")
-								if shealflag then
-									CastSpell(sheal)
-								end
+					end
+					
+					if FotMREADY and ASIConfig["teammateshieldi"..i] and Shield then
+						if GetDistance(allytarget)<=FotMrange then
+							local FotMflag, dmgpercent = shieldCheck(object,spell,allytarget,"items")
+							if FotMflag then
+								CastSpell(FotMslot, allytarget)
 							end
 						end
-						
-						if lisREADY and ASIConfig["teammateshieldi"..i] and Shield then
-							if GetDistance(allytarget)<=lisrange then
-								local lisflag, dmgpercent = shieldCheck(object,spell,allytarget,"items")
-								if lisflag then
-									CastSpell(lisslot)
-								end
-							end
-						end
-						
-						if FotMREADY and ASIConfig["teammateshieldi"..i] and Shield then
-							if GetDistance(allytarget)<=FotMrange then
-								local FotMflag, dmgpercent = shieldCheck(object,spell,allytarget,"items")
-								if FotMflag then
-									CastSpell(FotMslot, allytarget)
-								end
-							end
-						end
-						
-						if seREADY and ASIConfig["teammateshieldi"..i] and allytarget.isMe and Shield then
-							local seflag, dmgpercent = shieldCheck(object,spell,allytarget,"items")
-							if seflag then
-								CastSpell(seslot)
-							end
+					end
+					
+					if seREADY and ASIConfig["teammateshieldi"..i] and allytarget.isMe and Shield then
+						local seflag, dmgpercent = shieldCheck(object,spell,allytarget,"items")
+						if seflag then
+							CastSpell(seslot)
 						end
 					end
 				end
