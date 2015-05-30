@@ -15,7 +15,7 @@
 		- Press shift to configure	
 ]]
 
-local version = "1.06"
+local version = "1.07"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/AutoShield.lua".."?rand="..math.random(1,10000)
@@ -345,7 +345,7 @@ function OnProcessSpell(object,spell)
 			elseif spell.name:find("SummonerDot") then
 				Shield = true
 			elseif spelltype == "Q" or spelltype == "W" or spelltype == "E" or spelltype == "R" or spelltype == "P" or spelltype == "QM" or spelltype == "WM" or spelltype == "EM" then
-				if object.charName == "Ekko" then return end
+				if skillShield[object.charName] == nil then return end
 				HitFirst = skillShield[object.charName][spelltype]["HitFirst"]
 				YWall = skillShield[object.charName][spelltype]["YWall"]
 				BShield = skillShield[object.charName][spelltype]["BShield"]
