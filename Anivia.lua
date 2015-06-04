@@ -1,4 +1,4 @@
-local version = "1.24"
+local version = "1.25"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Anivia.lua".."?rand="..math.random(1,10000)
@@ -348,7 +348,7 @@ end
 
 function CastE()
 	for i, enemy in pairs(myEnemyTable) do
-        if GetDistance(enemy) <= SkillE.range then
+        if GetDistance(enemy) <= SkillE.range and ValidTarget(enemy) then
 			if SkillE.ready then
 				if Settings.SSettings.Eset.Echilled then
 					if TargetHaveBuff("chilled", enemy) then
