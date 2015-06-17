@@ -1,4 +1,4 @@
-local version = "1.09"
+local version = "1.10"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Rengar.lua".."?rand="..math.random(1,10000)
@@ -60,8 +60,6 @@ end
 ----------------------
 --     Variables    --
 ----------------------
-loaded = false
-
 local priorityTable = {
     p5 = {"Alistar", "Amumu", "Blitzcrank", "Bard", "Braum", "ChoGath", "DrMundo", "Garen", "Gnar", "Hecarim", "Janna", "JarvanIV", "Leona", "Lulu", "Malphite", "Nami", "Nasus", "Nautilus", "Nunu","Olaf", "Rammus", "Renekton", "Sejuani", "Shen", "Shyvana", "Singed", "Sion", "Skarner", "Sona","Soraka", "Taric", "Thresh", "Volibear", "Warwick", "MonkeyKing", "Yorick", "Zac", "Zyra"},
     p4 = {"Aatrox", "Darius", "Elise", "Evelynn", "Galio", "Gangplank", "Gragas", "Irelia", "Jax","LeeSin", "Maokai", "Morgana", "Nocturne", "Pantheon", "Poppy", "Rengar", "Rumble", "Ryze", "Swain","Trundle", "Tryndamere", "Udyr", "Urgot", "Vi", "XinZhao", "RekSai"},
@@ -135,20 +133,30 @@ function readyCheck()
 	spells.q.ready, spells.w.ready, spells.e.ready, spells.r.ready = (myHero:CanUseSpell(_Q) == READY), (myHero:CanUseSpell(_W) == READY), (myHero:CanUseSpell(_E) == READY), (myHero:CanUseSpell(_R) == READY)
 end
 
--- Orbwalker check
-function orbwalkCheck()
+function SetupOrbwalk()
 	if _G.AutoCarry then
-		PrintChat("SA:C detected, support enabled.")
-		SACLoaded = true
+		if _G.Reborn_Initialised then
+			CustomPrint("Found SAC: Reborn")
+			settings.orb:addParam("Info", "SAC: Reborn detected!", SCRIPT_PARAM_INFO, "")
+		else
+			CustomPrint("Found SAC: Revamped")
+			settings.orb:addParam("Info", "SAC: Revamped detected!", SCRIPT_PARAM_INFO, "")
+		end
+	elseif _G.Reborn_Loaded then
+		DelayAction(function() SetupOrbwalk() end, 1)
 	elseif _G.MMA_Loaded then
-		PrintChat("MMA detected, support enabled.")
-		MMALoaded = true
+		CustomPrint("Found MMA")
+		settings.orb:addParam("Info", "MMA detected!", SCRIPT_PARAM_INFO, "")
+	elseif FileExist(LIB_PATH .. "Big Fat Orbwalker.lua") then
+		require "Big Fat Orbwalker"
+		settings.orb:addParam("Info", "Big Fat Orbwalker detected!", SCRIPT_PARAM_INFO, "")
+	elseif FileExist(LIB_PATH .. "SxOrbWalk.lua") then
+		require 'SxOrbWalk'
+		SxOrb = SxOrbWalk()
+		SxOrb:LoadToMenu(settings.orb)
+		CustomPrint("Found SxOrb.")
 	else
-		PrintChat("SA:C/MMA not running, loading SxOrbWalk.")
-		require("SxOrbWalk")
-		SxMenu = scriptConfig("SxOrbWalk", "SxOrb")
-		SxOrb:LoadToMenu(SxMenu)
-		SACLoaded = false
+		CustomPrint("No valid Orbwalker found")
 	end
 end
 
@@ -159,7 +167,7 @@ end
 function getTarg()
 	ts:update()
 	if _G.AutoCarry and ValidTarget(_G.AutoCarry.Crosshair:GetTarget()) then _G.AutoCarry.Crosshair:SetSkillCrosshairRange(1200) return _G.AutoCarry.Crosshair:GetTarget() end		
-	if ValidTarget(SelectedTarget) and SelectedTarget.type == myHero.type then return SelectedTarget end
+	if SelectedTarget ~= nil and not SelectedTarget.dead and SelectedTarget.type == myHero.type then return SelectedTarget end
 	if MMALoaded and ValidTarget(_G.MMA_Target) then return _G.MMA_Target end
 	return ts.target
 end
@@ -250,35 +258,23 @@ end
 
 -- Init hook
 function OnLoad()
-	if not loaded then
-		loaded = true
-		print("<font color='#009DFF'>[Rengar]</font><font color='#FFFFFF'> has loaded!</font> <font color='#2BFF00'>[v"..version.."]</font>")
+	print("<font color='#009DFF'>[Rengar]</font><font color='#FFFFFF'> has loaded!</font> <font color='#2BFF00'>[v"..version.."]</font>")
 
-		if autoupdate then
-			update()
-		end
+	if autoupdate then
+		update()
+	end
 
-		ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1000, DAMAGE_PHYSICAL, true)
-		pred = VPrediction()
-		
-		if useHP then
-			HPred = HPrediction()
-			HPred:AddSpell("E", 'Rengar', {collisionM = true, collisionH = true, delay = spells.e.delay, range = spells.e.range, speed = spells.e.speed, type = "DelayLine", width = spells.e.width})
-		end
-		
-		Menu()
-		
-		arrangePriority()
+	ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1000, DAMAGE_PHYSICAL, true)
+	pred = VPrediction()
+	
+	if useHP then
+		HPred = HPrediction()
+		HPred:AddSpell("E", 'Rengar', {collisionM = true, collisionH = true, delay = spells.e.delay, range = spells.e.range, speed = spells.e.speed, type = "DelayLine", width = spells.e.width})
 	end
 	
-	if _G.Reborn_Initialised then
-        orbwalkCheck()
-    elseif _G.Reborn_Loaded then
-        DelayAction(OnLoad, 1)
-        return
-    else
-        orbwalkCheck()
-    end
+	Menu()
+	
+	arrangePriority()
 end
 
 function OnApplyBuff(source, unit, buff)
@@ -366,7 +362,9 @@ function OnTick()
 					CastE(Target)
 				end
 			elseif myHero.mana == 5 and settings.combo.empE and (comboSpell == "Smart" or comboSpell == "E") then
-				if MyTrueRange < 700 and GetDistance(Target) > settings.combo.empERange then
+				if MyTrueRange < 700 and comboSpell == "E" then
+					CastE(Target)
+				elseif MyTrueRange < 700 and GetDistance(Target) > settings.combo.empERange then
 					CastE(Target)
 				end
 			end
@@ -453,6 +451,10 @@ function Menu()
 				settings.gapClose:addParam(enemy.charName, enemy.charName .. " - " .. enemy:GetSpellData(isAGapcloserUnit[enemy.charName].spell).name, SCRIPT_PARAM_ONOFF, true)
 			end
 		end
+		
+	settings:addSubMenu("Orbwalk Settings", "orb")
+	
+	SetupOrbwalk()
 	
     settings:addParam("pred", "Prediction Type", SCRIPT_PARAM_LIST, 1, { "VPrediction", "DivinePred", "HPrediction"})
 end

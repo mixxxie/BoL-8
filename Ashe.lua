@@ -1,4 +1,4 @@
-local version = "1.19"
+local version = "1.20"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/Ashe.lua".."?rand="..math.random(1,10000)
@@ -24,7 +24,7 @@ if AUTOUPDATE then
 	end
 end
 
-if myHero.charName ~= "Ashe" then return end   
+if myHero.charName ~= "Ashe" then return end
 
 --Script Status Updates
 assert(load(Base64Decode("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"), nil, "bt", _ENV))() ScriptStatus("OBEDBJGCACG") 
@@ -32,7 +32,7 @@ assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQIKAAAABgBAAEFAAA
 if FileExist(LIB_PATH .. "/VPrediction.lua") then
 	require "VPrediction"
 else
-	PrintChat("This script wont work without VPrediction. Please download it.")
+	PrintChat("This script won't work without VPrediction. Please download it.")
 	return
 end
 
@@ -169,18 +169,13 @@ function OnLoad()
 	if not loaded then
 		loaded = true
 		print("<font color='#009DFF'>[Ashe]</font><font color='#FFFFFF'> has loaded!</font> <font color='#2BFF00'>[v"..version.."]</font>")
-
-		if autoupdate then
-			update()
-		end
-
 		ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1200, DAMAGE_PHYSICAL, true)
 		pred = VPrediction()
 		
 		if useHP then
 			HPred = HPrediction()
-			HPred:AddSpell("W", 'Ashe', {collisionM = true, collisionH = true, delay = spells.w.delay, range = spells.w.range, speed = spells.w.speed, type = "DelayLine", width = spells.w.width})
-			HPred:AddSpell("R", 'Ashe', {delay = spells.r.delay, range = math.huge, speed = spells.r.speed, type = "DelayLine", width = spells.r.width})
+			HP_W = HPSkillshot({type = "DelayLine", delay = 0.25, range = 1200, speed = 2000, collisionM = true, collisionH = true, width = 50})
+			HP_R = HPSkillshot({type = "DelayLine", delay = 0.25, range = math.huge, speed = 1600, collisionM = false, collisionH = true, width = 130})
 		end
 		
 		Menu()
@@ -198,6 +193,7 @@ function OnLoad()
     end
 end
 
+-- Tick hook
 -- Tick hook
 function OnTick()
 	readyCheck()
@@ -440,15 +436,14 @@ function CastW(unit)
 		elseif settings.pred == 2 and VIP_USER and (os.clock() * 1000 - lastWCheck) > 200 and useDP then	
 			local targ = DPTarget(unit)
 			local state,hitPos,perc = dp:predict(targ, wpred)
-			
+
 			lastWCheck = os.clock() * 1000
 			
 			if state == SkillShot.STATUS.SUCCESS_HIT then
 				CastSpell(_W, hitPos.x, hitPos.z)
 			end
 		elseif settings.pred == 3 and useHP then
-			local WPos, WHitChance = HPred:GetPredict("W", unit, myHero)
-  
+			local WPos, WHitChance = HPred:GetPredict(HP_W, unit, myHero)
 			if WHitChance > 0 then
 				CastSpell(_W, WPos.x, WPos.z)
 			end
@@ -496,12 +491,11 @@ function CastR(unit)
 				CastSpell(_R, hitPos.x, hitPos.z)
 			end
 		elseif settings.pred == 3 and useHP then
-			local RPos, RHitChance = HPred:GetPredict("R", unit, myHero)
-  
-			if RHitChance > 0 then
+			local RPos, RHitChance = HPred:GetPredict(HP_R, unit, myHero)
+			if RHitChance > 1 then
 				CastSpell(_R, RPos.x, RPos.z)
 			end
-		end
+		end		
 	end
 end
 
