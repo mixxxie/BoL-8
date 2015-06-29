@@ -1,4 +1,4 @@
-local version = "1.03"
+local version = "1.04"
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/JungleBundle.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
@@ -182,9 +182,9 @@ function Variables()
 		auto["ks"] = {_Q, _E}
 	elseif myHero.charName == "Zac" then
 		spells[_Q] = {range = 550, delay = 0.25, speed = math.huge, width = 120, type = "linear", collision = false}
-		spells[_W] = {range = 0, delay = 0.25, speed = math.huge, width = 550, type = "circular", collision = false}
+		spells[_W] = {range = 0, delay = 0.25, speed = math.huge, width = 700, type = "circular", collision = false}
 		spells[_E] = {range = 1600, delay = 0.125, speed = 1500, width = 300, type = "circular", collision = false}
-		spells[_R] = {range = 0, delay = 0.25, speed = math.huge, width = 450, type = "circular", collision = false}
+		spells[_R] = {range = 0, delay = 0.25, speed = math.huge, width = 600, type = "circular", collision = false}
 		
 		auto["interrupt"] = {_E, _R}
 		auto["ks"] = {_Q, _W}
@@ -956,13 +956,13 @@ end
  
 function LoadRange(slot)
 	if spells[slot].range > 0 then return spells[slot].range
-	else return math.floor(spells[slot].width / 2 + GetDistance(myHero.minBBox)) end
+	else return math.floor(spells[slot].width / 2) end
 end
  
 function GetRange(slot)
 	if settings.spell[GetSpellData(slot).name] and settings.spell[GetSpellData(slot).name].range then return settings.spell[GetSpellData(slot).name].range end
 	if spells[slot].range > 0 then return spells[slot].range
-	else return math.floor(spells[slot].width / 2 + GetDistance(myHero.minBBox)) end
+	else return math.floor(spells[slot].width / 2) end
 	return 0
 end
 
