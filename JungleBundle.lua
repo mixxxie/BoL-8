@@ -1,4 +1,4 @@
-local version = "1.04"
+local version = "1.05"
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/JungleBundle.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
@@ -125,7 +125,7 @@ function Variables()
 	-- Champion Specific Variables --
 	if myHero.charName == "Aatrox" then
 		spells[_Q] = {range = 650 + 100, delay = 0.5, speed = math.huge, width = 285, type = "circular", collision = false}
-		spells[_W] = {range = Range(myHero)}
+		spells[_W] = {range = math.ceil(Range(myHero))}
 		spells[_E] = {range = 1075, delay = 0.25, speed = 1200, width = 150, type = "linear", collision = false}
 		spells[_R] = {range = 0, delay = 0.25, speed = math.huge, width = 550, type = "circular", collision = false}
 		
@@ -140,24 +140,28 @@ function Variables()
 	elseif myHero.charName == "Chogath" then
 		spells[_Q] = {range = 950, delay = 0.5, speed = math.huge, width = 250, type = "circular", collision = false}
 		spells[_W] = {range = 650, delay = 0.5, speed = math.huge, width = 345, type = "linear", collision = false}
-		spells[_E] = {range = Range(myHero)}
-		spells[_R] = {range = Range(myHero)}
+		spells[_E] = {range = math.ceil(Range(myHero))}
+		spells[_R] = {range = math.ceil(Range(myHero))}
 		
 		auto["interrupt"] = {_Q}
 	elseif myHero.charName == "Diana" then
-		spells[_Q] = {range = 1000, delay = 0.25, speed = 1600, width = 185, type = "circular", collision = false}
-		spells[_W] = {range = Range(myHero)}
-		spells[_E] = {range = 0, delay = 0.25, speed = math.huge, width = 450, type = "circular", collision = false}
+		spells[_Q] = {range = 900, delay = 0.25, speed = 1600, width = 185, type = "circular", collision = false}
+		spells[_W] = {range = math.ceil(Range(myHero))}
+		spells[_E] = {range = 0, delay = 0.25, speed = math.huge, width = 900, type = "circular", collision = false}
 		spells[_R] = {range = 825}
 		
 		auto["interrupt"] = {_E}
+		auto["combo"] = {_Q, _W, _E, _R}
+		auto["ks"] = {_Q, _R}
+		
+		buffs["R"] = 0
 	elseif myHero.charName == "Elise" then
 		spells[_Q] = {range = 625}
 		spells[_W] = {range = 950, delay = 0.125, speed = 1000, width = 100, type = "linear", collision = true}
 		spells[_E] = {range = 1100, delay = 0.25, speed = 1600, width = 55, type = "linear", collision = true}
 	elseif myHero.charName == "Evelynn" then
 		spells[_Q] = {range = 500}
-		spells[_W] = {range = Range(myHero)}
+		spells[_W] = {range = math.ceil(Range(myHero))}
 		spells[_E] = {range = 225}
 		spells[_R] = {range = 650, delay = 0.25, speed = 1250, width = 350, type = "circular", collision = false}
 	elseif myHero.charName == "Fiddlesticks" then
@@ -168,7 +172,7 @@ function Variables()
 		auto["interrupt"] = {_Q, _E}
 	elseif myHero.charName == "Gragas" then
 		spells[_Q] = {range = 850, delay = 0.25, speed = 1000, width = 250, type = "circular", collision = false}
-		spells[_W] = {range = Range(myHero)}
+		spells[_W] = {range = math.ceil(Range(myHero))}
 		spells[_E] = {range = 600, delay = 0.25, speed = 2800, width = 50, type = "linear", collision = true}
 		spells[_R] = {range = 1150, delay = 0.5, speed = math.huge, width = 350, type = "circular", collision = false}
 		
@@ -189,6 +193,7 @@ function Variables()
 		auto["interrupt"] = {_E, _R}
 		auto["ks"] = {_Q, _W}
 		auto["afterAttack"] = true
+		auto["combo"] = {_Q, _W, _E, _R}
 		
 		buffs["ZacE"] = 0
 		buffs["canMove"] = true
@@ -243,7 +248,9 @@ end
 
 function OnProcessSpell(object,spell)
 	if object.isMe then
-		if spell.name == "ZacE" then 
+		if spell.name == "DianaTeleport" then
+			buffs["R"] = os.clock() * 1000
+		elseif spell.name == "ZacE" then 
 			DelayAction(function() buffs["ZacE"] = 0 ZOrbWalker:EnableMove() end, 4)
 			ZOrbWalker:DisableMove()
 			buffs["canMove"] = false
@@ -437,7 +444,9 @@ function OnProcessSpell(object,spell)
 			if Interrupt[object.charName] ~= nil then
 				if Interrupt[object.charName].stop[spell.name] ~= nil then
 					if settings.interrupt[spell.name] then
-						if myHero.charName == "Zac" then
+						if myHero.charName == "Diana" then
+							if settings.interrupt[GetSpellData(_E).name] and IsReady(_E) and GetDistance(object) < GetRange(_E) then CastSpell(_E) return end
+						elseif myHero.charName == "Zac" then
 							if settings.interrupt[GetSpellData(_E).name] and IsReady(_E) and GetDistance(object) < GetRange(_E) then ZacCastE(object) return end
 							if settings.interrupt[GetSpellData(_R).name] and IsReady(_R) and GetDistance(object) < GetRange(_R) then CastSpell(_R, object) return end
 						end
@@ -559,6 +568,10 @@ function Menu()
 			end
 		end
 		
+	if myHero.charName == "Diana" then
+		settings.spell[SpellName(_R)]:addParam("mode", "Combo Mode", SCRIPT_PARAM_LIST, 1, { "R -> Q", "Q -> R"})
+	end
+		
 	settings:addSubMenu("[" .. myHero.charName .. "] - Items", "items")
 		for i, item in pairs(items) do
 			settings.items:addParam(item.name, "Use " .. item.displayName, SCRIPT_PARAM_ONOFF, true)
@@ -570,7 +583,7 @@ function Menu()
 	end
 		
 	-- KS --
-	if auto["ks"] or sdot then 
+	if auto["ks"] or sdot or ssmite then 
 		settings:addSubMenu("[" .. myHero.charName .. "] - KS", "ks")
 		
 			if myHero.charName == "RekSai" then
@@ -857,11 +870,11 @@ function BiggestRange()
 	local range = Range(myHero)
 	
 	if myHero.charName == "RekSai" then range = 1650 end
-	if myHero.charName == "Zac" then
-		if IsReady(_R) then range = GetRange(_R) end
-		if IsReady(_W) then range = GetRange(_E) end
-		if IsReady(_Q) then range = GetRange(_Q) end
-		if IsReady(_E) then range = GetRange(_E) end
+	
+	if auto["combo"] then
+		for i, slot in pairs(auto["combo"]) do
+			if IsReady(slot) and range < GetRange(slot) then range = GetRange(slot) end
+		end
 	end
 	
 	return range
@@ -966,6 +979,16 @@ function GetRange(slot)
 	return 0
 end
 
+function HasBuff(unit, buffname)
+    for i = 1, unit.buffCount do
+        local tBuff = unit:getBuff(i)
+        if tBuff.valid and BuffIsValid(tBuff) and tBuff.name == buffname then
+            return true
+        end
+    end
+    return false
+end
+
 ----------------------
 --     Spells       --
 ----------------------
@@ -983,7 +1006,22 @@ function Combo(unit)
 		end
 	end
 	
-	if myHero.charName == "RekSai" then
+	if myHero.charName == "Diana" then
+		if UseSpell(_E) and GetDistance(unit) < GetRange(_E) and GetDistance(unit) > Range(myHero) then 
+			local Position = VPred:GetPredictedPos(unit, 0.25)
+			if GetDistance(Position) < GetRange(_E) then
+				CastSpell(_E)
+			end
+		end
+		if UseSpell(_W) and GetDistance(unit) < GetRange(_W) then CastSpell(_W) end
+		if UseSpell(_R) and UseSpell(_Q) and GetDistance(unit) < GetRange(_R) and myHero.mana > GetSpellData(_R).mana + GetSpellData(_Q).mana and settings.spell[SpellName(_R)].mode == 1 then
+			CustomCast(_Q, unit)
+			DelayAction(function(t) CastSpell(_R, unit) end, 0.01, {unit})
+		end
+		if UseSpell(_Q) and GetDistance(unit) < GetRange(_Q) and settings.spell[SpellName(_R)].mode == 2 then CustomCast(_Q, unit) end
+		if UseSpell(_R) and GetDistance(unit) < GetRange(_R) and settings.spell[SpellName(_R)].mode == 2 and HasBuff(unit, "dianamoonlight") and os.clock() * 1000 - buffs["R"] > 2500 then CastSpell(_R, unit) end
+		if UseSpell(_Q) and (GetSpellData(_R).level == 0 or GetSpellData(_R).currentCd > GetSpellData(_Q).cd) and GetDistance(unit) < GetRange(_Q) then CustomCast(_Q, unit) end
+	elseif myHero.charName == "RekSai" then
 		if GetSpellData(_Q).name:find("burrow") then
 			if UseSpell(_Q) and GetDistance(unit) < GetRange(_Q) then CustomCast(_Q, unit) end
 			if UseSpell(_E) then
@@ -1098,7 +1136,10 @@ end
 
 function LaneClear()
 	for i, unit in pairs(enemyMinions.objects) do 
-		LaneClearSpells(unit, "lane")
+		if GetDistance(unit) < 1000 then
+			LaneClearSpells(unit, "lane")
+			return
+		end
 	end
 	
 	for i, unit in pairs(jungleMinions.objects) do 
@@ -1107,7 +1148,14 @@ function LaneClear()
 end
 
 function LaneClearSpells(unit, mode)
-	if myHero.charName == "RekSai" then
+	if myHero.charName == "Diana" then
+		if IsReady(_W) and GetDistance(unit) < GetRange(_W) then CastSpell(_W) end
+		if IsReady(_R) and IsReady(_Q) and GetDistance(unit) < GetRange(_R) and myHero.mana > GetSpellData(_R).mana + GetSpellData(_Q).mana and mode == "jungle" then
+			CastSpell(_Q, unit)
+			DelayAction(function(t) CastSpell(_R, t) end, 0.01, {unit})
+		end
+		if IsReady(_Q) and GetDistance(unit) < GetRange(_Q) then CastSpell(_Q, unit) end
+	elseif myHero.charName == "RekSai" then
 		if GetSpellData(_Q).name:find("burrow") then
 			if GetDistance(unit) < GetRange(_Q) and IsReady(_Q) then CastSpell(_Q, unit.x, unit.z) end
 		else
@@ -1130,14 +1178,17 @@ end
 
 function KS()
 	for i, unit in pairs(GetEnemyHeroes()) do
-		if not unit.dead and unit.visible then 
-			if myHero.charName == "RekSai" then
+		if not unit.dead and unit.visible then
+			if myHero.charName == "Diana" then
+				if settings.ks[GetSpellData(_Q).name] and IsReady(_Q) and GetDistance(unit) < GetRange(_Q) and unit.health < getDmg("Q", unit, myHero) then CustomCast(_Q, unit) end
+				if settings.ks[GetSpellData(_R).name] and IsReady(_R) and GetDistance(unit) < GetRange(_R) and unit.health < getDmg("R", unit, myHero) then CastSpell(_R, unit) end
+			elseif myHero.charName == "RekSai" then
 				if settings.ks.RekSaiE and GetSpellData(_E).name == "RekSaiE" and IsReady(_E) and GetDistance(unit) < Range(myHero) and unit.health < getDmg("E", unit, myHero) then CastSpell(_E, unit) end
 				if settings.ks.reksaiqburrowed and GetSpellData(_Q).name == "reksaiqburrowed" and IsReady(_Q) and GetDistance(unit) < GetRange(_Q) and unit.health < getDmg("QM", unit, myHero) then CustomCast(_Q, unit) end
 			elseif myHero.charName == "Zac" then
 				if buffs["canMove"] then
-					if settings.ks[GetSpellData(_Q).name] and UseSpell(_Q) and GetDistance(unit) < GetRange(_Q) and unit.health < getDmg("Q", unit, myHero) then CustomCast(_Q, unit) end
-					if settings.ks[GetSpellData(_Q).name] and UseSpell(_W) and GetDistance(unit) < GetRange(_W) and unit.health < getDmg("W", unit, myHero) then 
+					if settings.ks[GetSpellData(_Q).name] and IsReady(_Q) and GetDistance(unit) < GetRange(_Q) and unit.health < getDmg("Q", unit, myHero) then CustomCast(_Q, unit) end
+					if settings.ks[GetSpellData(_Q).name] and IsReady(_W) and GetDistance(unit) < GetRange(_W) and unit.health < getDmg("W", unit, myHero) then 
 						local Position = VPred:GetPredictedPos(unit, 0.25)
 						if GetDistance(Position) < GetRange(_W) then
 							CastSpell(_W)
@@ -1307,7 +1358,6 @@ function ZOrbWalker:__init()
 	ZOrbWalker.animationTime = 2
 	ZOrbWalker.lastAttack = 0
 	
-	ZOrbWalker.lastTarget = nil
 	ZOrbWalker.attacks = true
 	ZOrbWalker.move = true
 	
@@ -1367,8 +1417,8 @@ function ZOrbWalker:GetProjectileSpeed(unit)
 	return ZOrbWalker.projectileSpeeds[unit.charName] and ZOrbWalker.projectileSpeeds[unit.charName] or math.huge
 end
 function ZOrbWalker:OnTick()
-	if ZOrbWalker.settings.key.comboKey or ZOrbWalker.settings.key.mixedKey or ZOrbWalker.settings.key.lastKey or ZOrbWalker.settings.key.clearKey then
-		if ZOrbWalker:CanAttack() or ZOrbWalker.settings.move == 2 then
+	if ZOrbWalker.menu.key.comboKey or ZOrbWalker.menu.key.mixedKey or ZOrbWalker.menu.key.lastKey or ZOrbWalker.menu.key.clearKey then
+		if ZOrbWalker:CanAttack() or ZOrbWalker.menu.move == 2 then
 			ZOrbWalker:OrbWalk(ZOrbWalker:GetTarget())
 		else
 			ZOrbWalker:OrbWalk()
@@ -1377,8 +1427,8 @@ function ZOrbWalker:OnTick()
 end
 
 function ZOrbWalker:OnDraw()
-	if ZOrbWalker.settings.draw.aa then DrawCircle(myHero.x, myHero.y, myHero.z, ZOrbWalker:Range(myHero), 0xFFFF0000) end
-	if ZOrbWalker.settings.draw.enemy then
+	if ZOrbWalker.menu.draw.aa then DrawCircle(myHero.x, myHero.y, myHero.z, ZOrbWalker:Range(myHero), 0xFFFF0000) end
+	if ZOrbWalker.menu.draw.enemy then
 		for i, enemy in pairs(GetEnemyHeroes()) do
 			if not enemy.dead and enemy.visible then
 				DrawCircle(enemy.x, enemy.y, enemy.z, ZOrbWalker:Range(enemy), ZOrbWalker:InRange(myHero, enemy) and 0xFFFF0000 or 0xFF00FF00)
@@ -1395,33 +1445,33 @@ function ZOrbWalker:InTable(table, name)
 end
 
 function ZOrbWalker:Menu()
-	ZOrbWalker.settings = scriptConfig("ZOrbWalker", "Zopper")
+	ZOrbWalker.menu = scriptConfig("ZOrbWalker", "ZOrbWalker")
 	
-	ZOrbWalker.settings:addSubMenu("Mode Settings", "mode")
-		ZOrbWalker.settings.mode:addParam("priority", "Priorritize in Mixed Mode", SCRIPT_PARAM_LIST, 1, { "Hitting Minions", "Hitting Enemies"})
-		if myHero.range > 300 then ZOrbWalker.settings.mode:addParam("orbwalking",  "Orbwalking mode", SCRIPT_PARAM_LIST, 1, {"To mouse"}) 
-		else ZOrbWalker.settings.mode:addParam("orbwalking",  "Orbwalking mode", SCRIPT_PARAM_LIST, 1, { "To mouse"}) end
+	ZOrbWalker.menu:addSubMenu("Mode Settings", "mode")
+		ZOrbWalker.menu.mode:addParam("priority", "Priorritize in Mixed Mode", SCRIPT_PARAM_LIST, 1, { "Hitting Minions", "Hitting Enemies"})
+		if myHero.range > 300 then ZOrbWalker.menu.mode:addParam("orbwalking",  "Orbwalking mode", SCRIPT_PARAM_LIST, 1, {"To mouse"}) 
+		else ZOrbWalker.menu.mode:addParam("orbwalking",  "Orbwalking mode", SCRIPT_PARAM_LIST, 1, { "To mouse"}) end
 	
-	ZOrbWalker.settings:addSubMenu("Draw", "draw")
-		ZOrbWalker.settings.draw:addParam("aa", "My AA range", SCRIPT_PARAM_ONOFF, true)
-		ZOrbWalker.settings.draw:addParam("enemy", "Enemy AA range", SCRIPT_PARAM_ONOFF, true)
+	ZOrbWalker.menu:addSubMenu("Draw", "draw")
+		ZOrbWalker.menu.draw:addParam("aa", "My AA range", SCRIPT_PARAM_ONOFF, true)
+		ZOrbWalker.menu.draw:addParam("enemy", "Enemy AA range", SCRIPT_PARAM_ONOFF, true)
 	
-	ZOrbWalker.settings:addSubMenu("Keys", "key")
-		ZOrbWalker.settings.key:addParam("comboKey", "Fight Mode Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
-		ZOrbWalker.settings.key:addParam("mixedKey", "Mixed Mode Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
-		ZOrbWalker.settings.key:addParam("lastKey", "Last Hit Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("X"))
-		ZOrbWalker.settings.key:addParam("clearKey", "Lane/Jungle Clear Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("V"))
+	ZOrbWalker.menu:addSubMenu("Keys", "key")
+		ZOrbWalker.menu.key:addParam("comboKey", "Fight Mode Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+		ZOrbWalker.menu.key:addParam("mixedKey", "Mixed Mode Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
+		ZOrbWalker.menu.key:addParam("lastKey", "Last Hit Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("X"))
+		ZOrbWalker.menu.key:addParam("clearKey", "Lane/Jungle Clear Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("V"))
 end
 
 function ZOrbWalker:GetTarget(champion)
 	champion = champion or true
 	local target = nil
 	if not ZOrbWalker:CanAttack() then return nil end
-	if not target and ZOrbWalker.settings.key.comboKey or (ZOrbWalker.settings.key.mixedKey and ZOrbWalker.settings.mode.priority == 2) and champion then target = ZOrbWalker:GetEnemy() end
-	if not target and ZOrbWalker.settings.key.clearKey then target = ZOrbWalker:GetJungle() end
-	if not target and (ZOrbWalker.settings.key.mixedKey or ZOrbWalker.settings.key.lastKey or ZOrbWalker.settings.key.clearKey) then target = ZOrbWalker:GetMinion() end
-	if not target and ZOrbWalker.settings.key.mixedKey and ZOrbWalker.settings.mode.priority == 1 and champion then target = ZOrbWalker:GetEnemy() end
-	if not target and ZOrbWalker.settings.key.lastKey then target = ZOrbWalker:GetTower() end
+	if not target and ZOrbWalker.menu.key.comboKey or (ZOrbWalker.menu.key.mixedKey and ZOrbWalker.menu.mode.priority == 2) and champion then target = ZOrbWalker:GetEnemy() end
+	if not target and ZOrbWalker.menu.key.clearKey then target = ZOrbWalker:GetJungle() end
+	if not target and (ZOrbWalker.menu.key.mixedKey or ZOrbWalker.menu.key.lastKey or ZOrbWalker.menu.key.clearKey) then target = ZOrbWalker:GetMinion() end
+	if not target and ZOrbWalker.menu.key.mixedKey and ZOrbWalker.menu.mode.priority == 1 and champion then target = ZOrbWalker:GetEnemy() end
+	if not target and ZOrbWalker.menu.key.lastKey then target = ZOrbWalker:GetTower() end
 	return target
 end
 
@@ -1539,7 +1589,7 @@ function ZOrbWalker:GetMinion()
 		end
 	end
 	
-	if ZOrbWalker.settings.key.clearKey then
+	if ZOrbWalker.menu.key.clearKey then
 		table.sort(ZOrbWalker.minionTime, function(a,b) return a.timeOfKillTheoretical < b.timeOfKillTheoretical end)
 		for i, action in ipairs(ZOrbWalker.minionTime) do	
 			if ZOrbWalker:InRange(action.minion) then
@@ -1616,7 +1666,7 @@ end
 
 function ZOrbWalker:InRange(target, attacker)
 	attacker = attacker or myHero
-	return target and GetDistance(target, attacker) + GetDistance(target, target.minBBox) <=  ZOrbWalker:Range(attacker)
+	return target and GetDistance(target, attacker) <=  ZOrbWalker:Range(attacker) + GetDistance(target, target.minBBox)
 end
 
 function ZOrbWalker:Attack(target)
@@ -1630,7 +1680,7 @@ function ZOrbWalker:CanAttack()
 end
 
 function ZOrbWalker:CanMove()
-	return ZOrbWalker.lastAttack + ZOrbWalker.windUpTime < ZOrbWalker:GetTime() and not _G.evade
+	return ZOrbWalker.lastAttack + ZOrbWalker.windUpTime  < ZOrbWalker:GetTime() and not _G.evade
 end
 
 function ZOrbWalker:ValidTarget(target)
@@ -1639,9 +1689,8 @@ end
 
 function ZOrbWalker:OrbWalk(target)
 	if ZOrbWalker.attacks and ZOrbWalker:CanAttack() and ZOrbWalker:ValidTarget(target) then
-		ZOrbWalker.lastTarget = target
 		ZOrbWalker:Attack(target)
-	elseif ZOrbWalker:CanMove() and ZOrbWalker.move then
+	elseif ZOrbWalker:CanMove() and ZOrbWalker.move and GetDistance(mousePos, myHero) > 100 then
 		if target and ZOrbWalker:ValidTarget(target) then
 			myHero:MoveTo(target.x, target.z)
 		else
