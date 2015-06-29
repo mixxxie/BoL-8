@@ -1,4 +1,4 @@
-local version = "1.01"
+local version = "1.02"
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/JungleBundle.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
@@ -57,7 +57,7 @@ end
 --   Script Status  --
 ----------------------
 
-assert(load(Base64Decode("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"), nil, "bt", _ENV))() ScriptStatus("QDGFHHFLGDD") 
+assert(load(Base64Decode("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"), nil, "bt", _ENV))() ScriptStatus("REHGIIGMHEE") 
 
 ----------------------
 --     Variables    --
@@ -84,6 +84,7 @@ function Variables()
 	sbarrier = nil
 	sheal = nil
 	sflash = nil
+	ssmite = nil
 	sdot = nil
 	useitems = true
 	spelltype = nil
@@ -119,7 +120,7 @@ function Variables()
 	buffs = {}
 	auto = {}
 	lastUsedWall = 0
-	endPos, startPos
+	endPos, startPos = nil, nil
 
 	-- Champion Specific Variables --
 	if myHero.charName == "Aatrox" then
@@ -176,15 +177,22 @@ function Variables()
 		spells[_Q] = {range = 1650, delay = 0.125, speed = 4000, width = 60, type = "linear", collision = true}
 		spells[_E] = {range = 750, delay = 0.25, speed = 1600, width = 100, type = "linear", collision = false, ignoreRange = true}
 		
+		auto["wall"] = true
 		auto["afterAttack"] = true
 		auto["ks"] = {_Q, _E}
 	elseif myHero.charName == "Zac" then
-		spells[_Q] = {range = 550, delay = 0.4, speed = math.huge, width = 120, type = "linear", collision = false}
-		spells[_W] = {range = 0, delay = 0.25, speed = math.huge, width = 350, type = "circular", collision = false}
-		spells[_E] = {range = 1550, delay = 0.125, speed = 1500, width = 250, type = "circular", collision = false}
+		spells[_Q] = {range = 550, delay = 0.25, speed = math.huge, width = 120, type = "linear", collision = false}
+		spells[_W] = {range = 0, delay = 0.25, speed = math.huge, width = 550, type = "circular", collision = false}
+		spells[_E] = {range = 1600, delay = 0.125, speed = 1500, width = 300, type = "circular", collision = false}
 		spells[_R] = {range = 0, delay = 0.25, speed = math.huge, width = 450, type = "circular", collision = false}
 		
 		auto["interrupt"] = {_E, _R}
+		auto["ks"] = {_Q, _W}
+		auto["afterAttack"] = true
+		
+		buffs["ZacE"] = 0
+		buffs["canMove"] = true
+		blobs = {}
 	end 
 	
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerbarrier") then sbarrier = SUMMONER_1
@@ -195,6 +203,8 @@ function Variables()
 	elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerflash") then sflash = SUMMONER_2 end
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then sdot = SUMMONER_1
 	elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then sdot = SUMMONER_2 end
+	if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then ssmite = SUMMONER_1
+	elseif myHero:GetSpellData(SUMMONER_2).name:find("summonersmite") then ssmite = SUMMONER_2 end
 	
 	items = {
 		['ItemTiamatCleave']          = {true, name = "ItemTiamatCleave", displayName = "Tiamat", range = 400},
@@ -219,6 +229,15 @@ function OnLoad()
 end
 
 function OnProcessSpell(object,spell)
+	if object.isMe then
+		if spell.name == "ZacE" then 
+			DelayAction(function() buffs["ZacE"] = 0 ZOrbWalker:EnableMove() end, 4)
+			ZOrbWalker:DisableMove()
+			buffs["canMove"] = false
+			buffs["ZacE"] = os.clock()  * 1000 + 125
+		end
+	end
+
 	-- Auto Shield Process Spell --
 	if object.team ~= myHero.team and not myHero.dead and object.name ~= nil and not (object.name:find("Minion_") or object.name:find("Odin")) then
 		local leesinW = myHero.charName ~= "LeeSin" or myHero:GetSpellData(_W).name == "BlindMonkWOne"
@@ -405,6 +424,10 @@ function OnProcessSpell(object,spell)
 			if Interrupt[object.charName] ~= nil then
 				if Interrupt[object.charName].stop[spell.name] ~= nil then
 					if settings.interrupt[spell.name] then
+						if myHero.charName == "Zac" then
+							if settings.interrupt[GetSpellData(_E).name] and IsReady(_E) and GetDistance(object) < GetRange(_E) then ZacCastE(object) return end
+							if settings.interrupt[GetSpellData(_R).name] and IsReady(_R) and GetDistance(object) < GetRange(_R) then CastSpell(_R, object) return end
+						end
 					end
 				end
 			end
@@ -437,9 +460,14 @@ function OnDraw()
 	
 	for slot = _Q, _R  do
 		if spells[slot] then
-			if myHero.charName == "RekSai" and not GetSpellData(slot).name:lower():find("burrow") then return end
-			if settings.draw[GetSpellData(slot).name] and IsReady(slot) then
-				DrawCircle(myHero.x, myHero.y, myHero.z, GetRange(slot), 0xFFFF0000)
+			if myHero.charName == "RekSai" and not GetSpellData(slot).name:lower():find("burrow") then break end
+			
+			if myHero.charName == "Zac" and slot == _E and IsReady(_E) then
+				DrawCircle(myHero.x, myHero.y, myHero.z, 1100 + 100 * GetSpellData(_E).level, 0xFFFF0000)
+			else
+				if settings.draw[GetSpellData(slot).name] and IsReady(slot) then
+					DrawCircle(myHero.x, myHero.y, myHero.z, GetRange(slot), 0xFFFF0000)
+				end
 			end
 			
 			if ValidTarget(Target) and settings.draw[GetSpellData(slot).name .. "collision"] and IsReady(slot) then
@@ -449,12 +477,23 @@ function OnDraw()
 		end
 	end
 	
-	if startPos and endPos and (settings.key.runKey or (settings.key.comboKey and settings.wall.auto)) then 
-		local drawEndPos = startPos + 750 * (Vector(endPos) - Vector(startPos)):normalized()
+	if startPos and endPos and (settings.key.runKey or (settings.key.comboKey and settings.wall.auto)) then
+		local drawEndPos = endPos
+		if myHero.charName == "RekSai" then
+			drawEndPos = startPos + 750 * (Vector(endPos) - Vector(startPos)):normalized()
+		elseif myHero.charName == "Zac" then
+			local range = GetDistance(startPos, mousePos) > (1100 + 100 * GetSpellData(_E).level) and (1100 + 100 * GetSpellData(_E).level - 300) or GetDistance(startPos, mousePos)
+			drawEndPos = startPos + range * (Vector(mousePos) - Vector(startPos)):normalized()
+		end
 	
 		DrawCircle(startPos.x, startPos.y, startPos.z, 100, 0xFFFFFF00)
 		DrawCircle(drawEndPos.x, drawEndPos.y, drawEndPos.z, 100, 0xFFFFFF00)
 		DrawLine3D(startPos.x, startPos.y, startPos.z, drawEndPos.x, drawEndPos.y, drawEndPos.z, 3, ARGB(125, 255, 255,0))
+	end
+	
+	if myHero.charName == "Zac" and buffs["ZacE"] > 0 then
+		local timeDifference = os.clock() * 1000 - buffs["ZacE"] < (0.8 + 0.1 * GetSpellData(_E).level) * 1000 and os.clock() * 1000 - buffs["ZacE"] or (0.8 + 0.1 * GetSpellData(_E).level) * 1000
+		DrawCircle(myHero.x, myHero.y, myHero.z, timeDifference  *  (1100 + 100 * GetSpellData(_E).level - 300) / ((0.8 + 0.1 * GetSpellData(_E).level) * 1000) + 300, 0xFFFF0000)
 	end
 end
 
@@ -494,10 +533,15 @@ function Menu()
 				settings.spell:addSubMenu("[" .. myHero.charName .. "] - " .. SpellPosition(slot), SpellName(slot))
 				
 					settings.spell[SpellName(slot)]:addParam("combo", "Combo", SCRIPT_PARAM_ONOFF, true)
-					settings.spell[SpellName(slot)]:addParam("harass", "Harass", SCRIPT_PARAM_ONOFF, slot == _R and false or true)
+					
+					if slot == _R then 
+						settings.spell[SpellName(slot)]:addParam("harass", "Harass", SCRIPT_PARAM_ONOFF, false)
+					else
+						settings.spell[SpellName(slot)]:addParam("harass", "Harass", SCRIPT_PARAM_ONOFF, true)
+					end
 					
 					if spells[slot].range ~= nil and not spells[slot].ignoreRange then
-						settings.spell[SpellName(slot)]:addParam("range", "Maximum range", SCRIPT_PARAM_SLICE, spells[slot].range, 0, spells[slot].range, 0)
+						settings.spell[SpellName(slot)]:addParam("range", "Maximum range", SCRIPT_PARAM_SLICE, LoadRange(slot), 0, LoadRange(slot), 0)
 					end
 			end
 		end
@@ -507,23 +551,28 @@ function Menu()
 			settings.items:addParam(item.name, "Use " .. item.displayName, SCRIPT_PARAM_ONOFF, true)
 		end
 		
-	settings:addSubMenu("[" .. myHero.charName .. "] - Wall Jump", "wall")
-		settings.wall:addParam("auto", "Wall jump automatically in Combo", SCRIPT_PARAM_ONOFF, true)
+	if auto["wall"] then
+		settings:addSubMenu("[" .. myHero.charName .. "] - Wall Jump", "wall")
+			settings.wall:addParam("auto", "Wall jump automatically in Combo", SCRIPT_PARAM_ONOFF, true)
+	end
 		
 	-- KS --
-	if auto["ks"] ~= nil or sdot then 
+	if auto["ks"] or sdot then 
 		settings:addSubMenu("[" .. myHero.charName .. "] - KS", "ks")
 		
 			if myHero.charName == "RekSai" then
 				settings.ks:addParam("reksaiqburrowed", "Use Burrowed Q", SCRIPT_PARAM_ONOFF, true)
 				settings.ks:addParam("RekSaiE", "Use Unburrowed E", SCRIPT_PARAM_ONOFF, true)
 			else
-				for i, slot in pairs(auto["ks"]) do
-					settings.ks:addParam(SpellName(slot), "Use " .. SpellPosition(slot), SCRIPT_PARAM_ONOFF, false)
+				if auto["ks"] then 
+					for i, slot in pairs(auto["ks"]) do
+						settings.ks:addParam(SpellName(slot), "Use " .. SpellPosition(slot), SCRIPT_PARAM_ONOFF, true)
+					end
 				end
 			end
 			
 			if sdot then settings.ks:addParam("dot", "Use Ignite", SCRIPT_PARAM_ONOFF, true) end
+			if ssmite then settings.ks:addParam("smite", "Use Smite", SCRIPT_PARAM_ONOFF, true) end
 	end
 	
 	-- Auto Interrupt --
@@ -795,6 +844,12 @@ function BiggestRange()
 	local range = Range(myHero)
 	
 	if myHero.charName == "RekSai" then range = 1650 end
+	if myHero.charName == "Zac" then
+		if IsReady(_R) then range = GetRange(_R) end
+		if IsReady(_W) then range = GetRange(_E) end
+		if IsReady(_Q) then range = GetRange(_Q) end
+		if IsReady(_E) then range = GetRange(_E) end
+	end
 	
 	return range
 end
@@ -857,11 +912,10 @@ function CustomCast(spell, target, from, chance)
 	if target == nil or target.dead then return end
 	if myHero.dead then return end
 	if CanUseSpell(spell) ~= READY then return end
-	if spells[spell].range and GetDistance(from, target) > GetRange(spell) then return end
 	
 	if target.isMe then CastSpell(spell) end
 	if spells[spell].type ~= nil and spells[spell].width ~= nil and spells[spell].delay ~= nil and spells[spell].range ~= nil and spells[spell].width ~= nil then
-		local CastPosition, HitChance, HeroPosition = UPL:Predict(spell, from, target)	
+		local CastPosition, HitChance, HeroPosition = UPL:Predict(spell, from, target)
 		if HitChance >= chance then
 			CastSpell(spell, CastPosition.x, CastPosition.z)
 		end
@@ -881,16 +935,21 @@ function UseSpell(slot)
 	if not IsReady(slot) then return false end
 	if not settings.spell[GetSpellData(slot).name] and (settings.key.comboKey  or settings.key.harassKey) then return true end
 	if not settings.spell[GetSpellData(slot).name] then return false end
-	if settings.spell[GetSpellData(slot).name] and not settings.spell[GetSpellData(slot).name].combo and (settings.key.comboKey  or settings.key.harassKey) then return true end
+	if settings.spell[GetSpellData(slot).name] and settings.spell[GetSpellData(slot).name].combo == nil and (settings.key.comboKey  or settings.key.harassKey) then return true end
 	if settings.key.comboKey and settings.spell[GetSpellData(slot).name].combo then return true end
 	if settings.key.harassKey and settings.spell[GetSpellData(slot).name].harass then return true end
 	return false
 end
  
+function LoadRange(slot)
+	if spells[slot].range > 0 then return spells[slot].range
+	else return math.floor(spells[slot].width / 2 + GetDistance(myHero.minBBox)) end
+end
+ 
 function GetRange(slot)
 	if settings.spell[GetSpellData(slot).name] and settings.spell[GetSpellData(slot).name].range then return settings.spell[GetSpellData(slot).name].range end
-	if spells[slot].range > 0 then return spells[slot].range 
-	else return spells[slot].width end
+	if spells[slot].range > 0 then return spells[slot].range
+	else return math.floor(spells[slot].width / 2 + GetDistance(myHero.minBBox)) end
 	return 0
 end
 
@@ -922,12 +981,30 @@ function Combo(unit)
 			if UseSpell(_E) and GetDistance(unit) < Range(myHero) and (myHero.mana == 100 or getDmg("E", unit, myHero) > unit.health * 0.95) then CastSpell(_E, unit) end
 			if UseSpell(_W) and GetDistance(unit) > Range(myHero) then CastSpell(_W) end
 		end
+	elseif myHero.charName == "Zac" then
+		if buffs["canMove"] then
+			if UseSpell(_Q) and GetDistance(unit) < GetRange(_Q) then CustomCast(_Q, unit) end
+			if UseSpell(_W) and GetDistance(unit) < GetRange(_W) then 
+				local Position = VPred:GetPredictedPos(unit, 0.25)
+				if GetDistance(Position) < GetRange(_W) then
+					CastSpell(_W)
+				end
+			end
+			if UseSpell(_E) and GetDistance(unit) < GetRange(_E) then ZacCastE(unit) end
+			if UseSpell(_R) and GetDistance(unit) < GetRange(_R) then CastSpell(_R, unit) end
+		else 
+			if not IsReady(_E) then
+				buffs["canMove"] = true
+				ZOrbWalker:EnableMove()
+			end
+		end
 	end
 end
 
 function Automatic()
-	if settings.key.runKey or (settings.key.comboKey and settings.wall.auto) and os.clock() * 1000 - lastUsedWall > 500 then
-		local p1, p2 = GetRoot()
+	if auto["wall"] and settings.wall and (settings.key.runKey or (settings.key.comboKey and settings.wall.auto)) and os.clock() * 1000 - lastUsedWall > 200 then
+		local p1, p2 = GetRoute()
+		lastUsedWall = os.clock() * 1000
 		
 		if p1 and p2 and GetDistance(p1, p2) > 50 then
 			if not startPos then
@@ -939,19 +1016,16 @@ function Automatic()
 		
 		if startPos and endPos then
 			if myHero.charName == "RekSai" and GetSpellData(_E).name == "reksaieburrowed" and IsReady(_E) then
-				if GetDistance(startPos, endPos) < 750 then
-					ZOrbWalker:GoTo(startPos)
-				else
-					startPos, endPos = nil, nil
-				end
+				JumpWall(750)
 				
 				if startPos and endPos and GetDistance(startPos) < 75 then
 					CastSpell(_E, endPos.x, endPos.z)
-					lastUsedWall = os.clock() * 1000
 				end
 			else
 				startPos, endPos = nil, nil
 			end
+		else
+			ZOrbWalker:EnableMove()
 		end
 		
 		if not startPos and settings.key.runKey then
@@ -972,7 +1046,17 @@ function Automatic()
 	end
 end
 
-function GetRoot()
+function JumpWall(range)
+	if GetDistance(startPos, endPos) < range then
+		ZOrbWalker:GoTo(startPos)
+		ZOrbWalker:DisableMove()
+		DelayAction(function() if not (settings.key.runKey or (settings.key.comboKey and settings.wall.auto) and auto["wall"]) then ZOrbWalker:EnableMove() end end, 0.2)
+	else
+		startPos, endPos = nil, nil
+	end
+end
+
+function GetRoute()
 	local counter, startP, endP  = 1, nil, nil
 		
 	while true do
@@ -1001,21 +1085,32 @@ end
 
 function LaneClear()
 	for i, unit in pairs(enemyMinions.objects) do 
-		LaneClearSpells(unit)
+		LaneClearSpells(unit, "lane")
 	end
 	
 	for i, unit in pairs(jungleMinions.objects) do 
-		LaneClearSpells(unit)
+		LaneClearSpells(unit, "jungle")
 	end
 end
 
-function LaneClearSpells(unit)
+function LaneClearSpells(unit, mode)
 	if myHero.charName == "RekSai" then
 		if GetSpellData(_Q).name:find("burrow") then
 			if GetDistance(unit) < GetRange(_Q) and IsReady(_Q) then CastSpell(_Q, unit.x, unit.z) end
 		else
 			if GetDistance(unit) < Range(myHero) and IsReady(_E) and (myHero.mana == 100 or getDmg("E", unit, myHero) > unit.health * 0.95) then CastSpell(_E, unit) end
 			if GetDistance(unit) < Range(myHero) and IsReady(_Q) then CastSpell(_Q, unit) end
+		end
+	elseif myHero.charName == "Zac" then
+		if buffs["canMove"] then
+			if GetDistance(unit) < (1100 + 100 * GetSpellData(_E).level) and IsReady(_E) and mode == "jungle" then ZacCastE(unit) end
+			if GetDistance(unit) < GetRange(_Q) and IsReady(_Q) then CastSpell(_Q, unit.x, unit.z) end
+			if GetDistance(unit) < GetRange(_W) and IsReady(_W) then CastSpell(_W) end
+		else
+			if not IsReady(_E) then
+				buffs["canMove"] = true
+				ZOrbWalker:EnableMove()
+			end
 		end
 	end
 end
@@ -1026,13 +1121,61 @@ function KS()
 			if myHero.charName == "RekSai" then
 				if settings.ks.RekSaiE and GetSpellData(_E).name == "RekSaiE" and IsReady(_E) and GetDistance(unit) < Range(myHero) and unit.health < getDmg("E", unit, myHero) then CastSpell(_E, unit) end
 				if settings.ks.reksaiqburrowed and GetSpellData(_Q).name == "reksaiqburrowed" and IsReady(_Q) and GetDistance(unit) < GetRange(_Q) and unit.health < getDmg("QM", unit, myHero) then CustomCast(_Q, unit) end
+			elseif myHero.charName == "Zac" then
+				if buffs["canMove"] then
+					if settings.ks[GetSpellData(_Q).name] and UseSpell(_Q) and GetDistance(unit) < GetRange(_Q) and unit.health < getDmg("Q", unit, myHero) then CustomCast(_Q, unit) end
+					if settings.ks[GetSpellData(_Q).name] and UseSpell(_W) and GetDistance(unit) < GetRange(_W) and unit.health < getDmg("W", unit, myHero) then 
+						local Position = VPred:GetPredictedPos(unit, 0.25)
+						if GetDistance(Position) < GetRange(_W) then
+							CastSpell(_W)
+						end
+					end
+				end
 			end
 			
-			if sdot then
-				if settings.ks.dot and GetDistance(unit) < 600  and unit.health < getDmg("IGNITE", unit, myHero) then CastSpell(sdot, unit) end
+			if sdot then if settings.ks.dot and GetDistance(unit) < 600  and unit.health < getDmg("IGNITE", unit, myHero) then CastSpell(sdot, unit) end end
+			if ssmite then 
+				if settings.ks.smite and GetSpellData(ssmite).name:find("duel") and GetDistance(unit) - GetDistance(unit, unit.minBBox) - GetDistance(myHero, myHero.minBBox) < 500 and unit.health < getDmg("SMITESS", unit, myHero) then CastSpell(ssmite, unit) end 
+				if settings.ks.smite and GetSpellData(ssmite).name:find("ganker") and GetDistance(unit) - GetDistance(unit, unit.minBBox) - GetDistance(myHero, myHero.minBBox) < 500 and unit.health < getDmg("SMITESB", unit, myHero) then CastSpell(ssmite, unit) end 
 			end
 		end
 	end
+end
+
+function ZacCastE(unit)
+	if buffs["ZacE"] == 0 and IsReady(_E) then
+		if GetDistance(unit) < 1050 + 100 * GetSpellData(_E).level then
+			buffs["ZacE"] = os.clock() * 1000 + 125 - ZOrbWalker:Latency()
+			buffs["canMove"] = false
+			ZOrbWalker:DisableMove()
+			
+			CastSpell(_E, unit.x, unit.z)
+		end
+	else
+		local Position = VPred:GetPredictedPos(unit, GetDistance(unit) / spells[_E].speed) 
+		local nearestUnit = myHero
+		
+		for i, ally in pairs(GetAllyHeroes()) do
+			if not ally.dead and GetDistance(ally, unit) < GetDistance(nearestUnit, unit) then
+				nearestUnit = ally
+			end
+		end
+		
+		Position = Vector(Position) + 75 * (Vector(unit) - Vector(nearestUnit)):normalized()
+		
+		local timeDifference = os.clock() * 1000 - buffs["ZacE"] < (0.8 + 0.1 * GetSpellData(_E).level) * 1000 and os.clock() * 1000 - buffs["ZacE"] or (0.8 + 0.1 * GetSpellData(_E).level) * 1000
+		local distanceModifier = (1100 + 100 * GetSpellData(_E).level - 300) / ((0.8 + 0.1 * GetSpellData(_E).level) * 1000)
+
+		if GetDistance(unit) < timeDifference * distanceModifier + 300 then
+			CastSpell2(_E, D3DXVECTOR3(Position.x, Position.y, Position.z))
+			return
+		elseif (os.clock() * 1000 - buffs["ZacE"]) > (0.8 + 0.1 * GetSpellData(_E).level) * 1000 then
+			CastSpell2(_E, D3DXVECTOR3(Position.x, Position.y, Position.z))
+			return
+		end
+	end
+	
+	DelayAction(function() ZacCastE(unit) end, 0.1)
 end
 
 ----------------------
@@ -1112,7 +1255,7 @@ function ZOrbWalker:__init()
 		["Nautilus"] = _W,
 		["Nidalee"] = _Q, -- Get Exact Name
 		["Poppy"] = _Q,
-		["RekSai"] = _Q, -- Get Exact Name
+		["RekSai"] = "RekSaiQ", -- Get Exact Name
 		["Renekton"] = _W,
 		["Rengar"] = _Q,
 		["Riven"] = _Q,
@@ -1495,7 +1638,7 @@ function ZOrbWalker:OrbWalk(target)
 end
 
 function ZOrbWalker:GoTo(point)
-	if ZOrbWalker:CanMove() and ZOrbWalker.move then
+	if ZOrbWalker:CanMove() then
 		myHero:MoveTo(point.x, point.z)
 	end
 end
