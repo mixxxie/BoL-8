@@ -1,4 +1,4 @@
-local version = "1.02"
+local version = "1.03"
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/gmzopper/BoL/master/JungleBundle.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
@@ -225,7 +225,20 @@ function OnLoad()
 	
 	if auto["afterAttack"] then ZOrbWalker:RegisterAfterAttackCallback(function(unit) AfterAttack(unit) end) end
 	
+	-- Disable SAC:R movement --
+	DisableSAC()
+	
 	CustomPrint("Ready to use, enjoy.")
+end
+
+function DisableSAC()
+	if _G.AutoCarry then
+		_G.AutoCarry.MyHero:MovementEnabled(false)
+		_G.AutoCarry.MyHero:AttacksEnabled(false)
+		CustomPrint("SAC:R has been disabled, using ZOrbWalker")
+	elseif _G.Reborn_Loaded then
+		DelayAction(function() DisableSAC() end, 1)
+	end
 end
 
 function OnProcessSpell(object,spell)
